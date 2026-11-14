@@ -259,11 +259,11 @@ const TYDEN = {
    Směsi zeleniny a ovoce na zkoušení, seřazené od nejjistější. */
 const PRIKRMY = {
   smesi: [
-    { nm: 'Máslová dýně s hruškou', pozn: 'Máslová je sladší a jemnější než hokkaido a hladce se rozmixuje. Na rozdíl od hokkaida ji oloupej.' },
-    { nm: 'Hokkaido s jablkem', pozn: 'Hokkaido 14. 11. Aničce docela nevadilo. Jablko k němu podus do měkka.' },
-    { nm: 'Batát s jablkem', pozn: 'Podobně sladké jako dýně.' },
-    { nm: 'Brokolice nebo cuketa s hruškou', pozn: 'Hruška přebije hořčí nebo nevýraznou chuť. Cuketa jí sama nechutnala, takhle ji můžeš zkusit znovu.' },
-    { nm: 'Mrkev s jablkem', pozn: 'Mrkev zatím moc nemusí, hovězí s mrkví nechtěla. Klidně ji zkus znovu, chuť se často přijme až po víc ochutnáních.' },
+    { nm: 'Máslová dýně s hruškou', foto: 'fotky/prikrm-dyne-hruska.png', pozn: 'Máslová je sladší a jemnější než hokkaido a hladce se rozmixuje. Na rozdíl od hokkaida ji oloupej.' },
+    { nm: 'Hokkaido s jablkem', foto: 'fotky/prikrm-hokkaido-jablko.png', pozn: 'Hokkaido 14. 11. Aničce docela nevadilo. Jablko k němu podus do měkka.' },
+    { nm: 'Batát s jablkem', foto: 'fotky/prikrm-batat-jablko.png', pozn: 'Podobně sladké jako dýně.' },
+    { nm: 'Brokolice nebo cuketa s hruškou', foto: 'fotky/prikrm-brokolice-hruska.png', pozn: 'Hruška přebije hořčí nebo nevýraznou chuť. Cuketa jí sama nechutnala, takhle ji můžeš zkusit znovu.' },
+    { nm: 'Mrkev s jablkem', foto: 'fotky/prikrm-mrkev-jablko.png', pozn: 'Mrkev zatím moc nemusí, hovězí s mrkví nechtěla. Klidně ji zkus znovu, chuť se často přijme až po víc ochutnáních.' },
   ],
   postup: [
     'Zeleninu nakrájej na kousky a vař v páře nebo ve vodě do měkka, asi 15-20 minut.',
@@ -409,7 +409,7 @@ function vykresliRecept(id, porce) {
 /* ===== Příkrmy ===== */
 function vykresliPrikrmy() {
   let h = `<article class="recept"><div class="top"><h1>Příkrmy pro Aničku</h1><p class="muted">Směsi zeleniny s ovocem na zkoušení, nahoře nejjistější.</p></div><div class="karty">`;
-  for (const m of PRIKRMY.smesi) h += `<div class="karta"><span class="nm">${esc(m.nm)}</span><span class="meta">${esc(m.pozn)}</span></div>`;
+  for (const m of PRIKRMY.smesi) h += `<div class="karta">${m.foto ? `<img src="${esc(m.foto)}" alt="${esc(m.nm === 'Brokolice nebo cuketa s hruškou' ? 'Brokolicové pyré s hruškou' : m.nm)}" loading="lazy">` : ''}<span class="nm">${esc(m.nm)}</span><span class="meta">${esc(m.pozn)}</span></div>`;
   h += `</div><div class="dva"><section><h2>Jak připravit</h2><ol>${PRIKRMY.postup.map(t => `<li>${esc(t)}</li>`).join('')}</ol></section>
     <section><h2>Na co myslet</h2><ul>${PRIKRMY.pravidla.map(t => `<li>${esc(t)}</li>`).join('')}</ul></section></div></article>`;
   $('#obsah').innerHTML = h;
