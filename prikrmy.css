@@ -1,0 +1,23 @@
+.p-tabs{display:flex;gap:6px;overflow:auto;margin:0 0 20px;padding:2px 0 10px}
+.p-tabs a{white-space:nowrap;padding:8px 12px;text-decoration:none;border-radius:var(--r-sm);font-weight:550;color:var(--muted)}
+.p-tabs a[aria-current]{background:var(--note);color:var(--note-ink)}
+.p-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 16px}
+.p-panel{background:var(--surface);padding:18px;border-radius:var(--r-md);margin:0 0 14px}
+.p-panel h2,.karta h2{font-size:18px;margin:0 0 8px}
+.p-panel p{margin:8px 0}.p-panel summary{cursor:pointer;font-weight:600;min-height:30px}
+.p-panel hr{border:0;border-top:1px solid var(--line);margin:22px 0}
+.p-day{display:flex;flex-direction:column;align-items:flex-start;gap:5px}.p-day .kdy{font-size:13px;color:var(--muted)}
+.p-day a{text-decoration-color:var(--line2);text-underline-offset:3px}.p-day .btn{font-size:13px;min-height:36px;padding:6px 10px}
+.p-day p{margin:0}.p-new{font-size:13px;color:var(--accent)}
+.p-warning{background:var(--note);color:var(--note-ink);padding:10px 12px;border-radius:var(--r-sm);font-size:14px}
+.p-tag{display:inline-block;background:var(--note);color:var(--note-ink);padding:3px 8px;border-radius:6px;font-size:12px}
+.p-field{display:flex;flex-direction:column;gap:5px;margin:12px 0;font-size:14px;font-weight:550}
+.p-field input,.p-field select,.p-field textarea,.p-toolbar input,.p-toolbar select{font:inherit;background:var(--bg);color:var(--ink);border:1px solid var(--line2);border-radius:8px;padding:10px;min-height:44px;max-width:100%;width:100%}
+.p-toolbar input,.p-toolbar select{width:auto;flex:1;min-width:180px}
+.p-field textarea{resize:vertical}.p-foods{border:1px solid var(--line);border-radius:10px;padding:12px;margin:16px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px}
+.p-foods legend{font-weight:600;padding:0 5px}.p-foods label{display:flex;align-items:center;gap:6px;font-size:14px;min-height:38px;flex-wrap:wrap}
+.p-foods input{width:18px;height:18px;accent-color:var(--accent)}.p-foods small{color:var(--muted);font-size:11px}
+.p-note{white-space:pre-wrap;overflow-wrap:anywhere}
+.p-form-grid{display:grid;gap:0 18px}.p-week{display:grid;gap:0 14px}
+@media(min-width:650px){.p-form-grid,.p-week{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:900px){.tyden .hlavicka,.tyden .den{grid-template-columns:155px repeat(4,minmax(0,1fr))}.p-day .kdy{display:none}.tyden{overflow-wrap:anywhere}}

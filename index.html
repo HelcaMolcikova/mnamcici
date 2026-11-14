@@ -143,6 +143,7 @@ a.karta:hover .nm{color:var(--accent)}
 .porce button:hover{box-shadow:inset 0 0 0 1.5px var(--accent)}
 .recept a{text-decoration-color:var(--line2);text-underline-offset:3px}
 </style>
+<link rel="stylesheet" href="prikrmy.css">
 </head>
 <body>
 <header class="head">
@@ -164,6 +165,7 @@ a.karta:hover .nm{color:var(--accent)}
   <a href="#prikrmy" data-r="prikrmy">Příkrmy</a>
 </nav>
 
+<script src="prikrmy.js"></script>
 <script>
 /* ===== Recepty =====
    Suroviny: [klíč, množství na celý recept (číslo nebo null), poznámka].
@@ -344,7 +346,7 @@ function vykresliTyden() {
   const SLOTY = ['Snídaně', 'Oběd', 'Večeře'];
   let h = `<div class="top"><h1>Týden ${datum(prvni)} - ${datum(posledni)}</h1>
     <p class="muted">Vaříme v neděli a v úterý večer.</p></div>
-    <div class="tyden"><div class="hlavicka" aria-hidden="true"><span></span>${SLOTY.map(s => `<span>${s}</span>`).join('')}</div>`;
+    <div class="tyden"><div class="hlavicka" aria-hidden="true"><span></span>${SLOTY.map(s => `<span>${s}</span>`).join('')}<span>Anička</span></div>`;
   const vcera = {};
   const jidlo = (j, opak) => {
     const nm = j.recept ? (RECEPTY[j.recept].kratce || RECEPTY[j.recept].nazev) : j.co;
@@ -370,9 +372,10 @@ function vykresliTyden() {
       vcera[i] = klice;
       return `<div class="slot${v.length ? '' : ' prazdne'}">${html}</div>`;
     }).join('');
-    h += `</section>`;
+    h += `<div class="slot">${PrikrmyApp.dayCard(PrikrmyApp.core.localDate(d.dt))}</div></section>`;
   }
   $('#obsah').innerHTML = h + '</div>';
+  PrikrmyApp.bindDayButtons($('#obsah'));
 }
 
 /* ===== Nákup ===== */
@@ -387,6 +390,13 @@ function seznam() {
       if (m == null) p.bezMnozstvi = true; else p.m += m * krat;
       p.pro.add(r.kratce);
     }
+  }
+  for (const item of PrikrmyApp.shopping()) {
+    const k = SUROVINY[item.id] ? item.id : 'prikrm-' + item.id;
+    const p = pol[k] || (pol[k] = {k, n:item.name, j:'', o:'Ovoce a zelenina', m:0, bezMnozstvi:true, pro:new Set()});
+    if (!SUROVINY[item.id]) p.o = ['kure','hovezi','ryba'].includes(item.id) ? 'Lednice' : ['ryze','cocka','arasid','mandle','sezam','soja','psenice'].includes(item.id) ? 'Trvanlivé' : 'Ovoce a zelenina';
+    p.bezMnozstvi = true;
+    p.pro.add('Anička: ' + item.title);
   }
   return Object.values(pol);
 }
@@ -462,13 +472,7 @@ function vykresliRecept(id, porce) {
 }
 
 /* ===== Příkrmy ===== */
-function vykresliPrikrmy() {
-  let h = `<article class="recept"><div class="top"><h1>Příkrmy pro Aničku</h1><p class="muted">Směsi zeleniny s ovocem na zkoušení, nahoře nejjistější.</p></div><div class="karty">`;
-  for (const m of PRIKRMY.smesi) h += `<div class="karta">${m.foto ? `<img src="${esc(m.foto)}" alt="${esc(m.nm === 'Brokolice nebo cuketa s hruškou' ? 'Brokolicové pyré s hruškou' : m.nm)}" loading="lazy">` : ''}<span class="nm">${esc(m.nm)}</span><span class="meta">${esc(m.pozn)}</span></div>`;
-  h += `</div><div class="dva"><section><h2>Jak připravit</h2><ol>${PRIKRMY.postup.map(t => `<li>${esc(t)}</li>`).join('')}</ol></section>
-    <section><h2>Na co myslet</h2><ul>${PRIKRMY.pravidla.map(t => `<li>${esc(t)}</li>`).join('')}</ul></section></div></article>`;
-  $('#obsah').innerHTML = h;
-}
+function vykresliPrikrmy(tab) { PrikrmyApp.render(tab); }
 
 /* ===== Navigace a režim ===== */
 function route() {
@@ -477,7 +481,7 @@ function route() {
   document.querySelectorAll('[data-r]').forEach(a => a.classList.toggle('on', a.dataset.r === sekce));
   if (r === 'nakup') vykresliNakup();
   else if (r === 'recepty') vykresliRecepty();
-  else if (r === 'prikrmy') vykresliPrikrmy();
+  else if (r === 'prikrmy') vykresliPrikrmy(id);
   else if (r === 'recept') vykresliRecept(id, porce ? +porce : null);
   else vykresliTyden();
   window.scrollTo(0, 0);
