@@ -140,6 +140,11 @@ const SUROVINY = {
   protlak:    { n: 'Rajský protlak', j: '', o: 'Trvanlivé' },
   kecup:      { n: 'Kečup', j: '', o: 'Trvanlivé' },
   okurky:     { n: 'Nakládané okurky', j: '', o: 'Trvanlivé' },
+  sardinky:   { n: 'Sardinky v konzervě', j: 'ks', o: 'Trvanlivé' },
+  palousek:   { n: 'Palouček', j: 'g', o: 'Lednice' },
+  chleb:      { n: 'Chleba', j: '', o: 'Pečivo' },
+  zelenina:   { n: 'Zelenina k chlebu', j: '', o: 'Ovoce a zelenina' },
+  horcice:    { n: 'Hořčice', j: '', o: 'Doma' },
   sadlo:      { n: 'Sádlo', j: '', o: 'Doma' },
   strouhanka: { n: 'Strouhanka', j: '', o: 'Doma' },
   sul:        { n: 'Sůl', j: '', o: 'Doma' },
@@ -189,6 +194,20 @@ const RECEPTY = {
     ],
     poznamky: ['Cibule nemusí být, chutnalo ti víc bez ní.', 'Množství vaříš po paměti, proto u surovin nejsou.'],
   },
+  sardinkova: {
+    nazev: 'Sardinková pomazánka', kratce: 'Sardinková', porce: 2, cas: '10 min', lednice: 'jíst ten den',
+    suroviny: [
+      ['sardinky', 2], ['palousek', 100], ['okurky', null, 'asi 6 menších a 3 lžíce láku'], ['horcice', null, 'trochu'], ['sul', null],
+      ['chleb', null, 'k podávání'], ['zelenina', null, 'k podávání'],
+    ],
+    postup: [
+      'Sardinky dej do misky a vidličkou je rozmačkej.',
+      'Přidej palouček, nakrájené kyselé okurky, asi 3 lžíce láku z okurek, část šťávy ze sardinek a případně trochu hořčice.',
+      'Všechno spolu promíchej a znovu lehce rozmačkej vidličkou, aby vznikla pomazánka.',
+      'Podle chuti dosol.',
+    ],
+    poznamky: ['Vyšla vám na večeři pro dva s chlebíkem a se zeleninou. Klidně by snesla i víc paloučků.'],
+  },
   oats: {
     nazev: 'Overnight oats s jablkem a skořicí', kratce: 'Overnight oats', porce: 1, cas: '5 min', lednice: 'nachystat nejvýš na 2 dny dopředu',
     suroviny: [['vlocky', 50], ['jogurt', 150], ['mleko', 80], ['jablko', 1], ['skorice', null, 'lžička']],
@@ -204,7 +223,8 @@ const RECEPTY = {
 /* ===== Týden =====
    Plán je společný pro všechny, kdo otevřou odkaz. Mění ho agent v tomto souboru.
    vari: co se ten den uvaří (recept a počet porcí, ze kterých se počítá nákup).
-   jidla: co se jí; recept = odkaz na recept, od = kdo jídlo přinesl, pozn = drobnost navíc. */
+   jidla: co se jí; recept = odkaz na recept, od = kdo jídlo přinesl, pozn = drobnost navíc,
+   chystas = rychlé jídlo připravené ten den (počet porcí jde do nákupu). */
 const TYDEN = {
   od: '2026-11-15',
   dny: [
@@ -216,6 +236,7 @@ const TYDEN = {
     { jidla: [
         { kdy: 'Snídaně', recept: 'oats', pozn: 'pro Helenu' },
         { kdy: 'Oběd', recept: 'rajska', pozn: 'z neděle' },
+        { kdy: 'Večeře', recept: 'sardinkova', chystas: 2, pozn: 'za 10 minut, s chlebem a zeleninou' },
       ] },
     { vari: [['sunkofleky', 4], ['oats', 2]],
       jidla: [
@@ -275,7 +296,8 @@ function vykresliTyden() {
 /* ===== Nákup ===== */
 function seznam() {
   const pol = {};
-  for (const d of dnyTydne()) for (const [id, porce] of d.vari || []) {
+  const k_vareni = d => [...(d.vari || []), ...d.jidla.filter(j => j.chystas).map(j => [j.recept, j.chystas])];
+  for (const d of dnyTydne()) for (const [id, porce] of k_vareni(d)) {
     const r = RECEPTY[id];
     const krat = porce && r.porce ? porce / r.porce : 1;
     for (const [k, m] of r.suroviny) {
@@ -299,7 +321,7 @@ function polozka(p, hotovo) {
 function vykresliNakup() {
   const hotovo = store.get(KLIC_NAKUP, []);
   const vse = seznam();
-  const oddeleni = ['Lednice', 'Ovoce a zelenina', 'Trvanlivé'];
+  const oddeleni = ['Lednice', 'Ovoce a zelenina', 'Pečivo', 'Trvanlivé'];
   let h = `<div class="top"><h1>Nákup</h1></div>
     <div class="akce"><button class="btn" id="kopirovat" type="button">Zkopírovat seznam</button></div><div class="nakup">`;
   for (const o of oddeleni) {
