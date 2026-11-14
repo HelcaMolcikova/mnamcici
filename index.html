@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="apple-mobile-web-app-title" content="Molčuchyně">
+<title>Molčuchyně</title>
+<script>try{var t=localStorage.getItem('molcuchyne-rezim');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<style>
+:root{--bg:#FAF6F2;--surface:#FFFFFF;--ink:#2E211C;--muted:#7A6A62;--line:#EFE4DC;--line2:#DCC7B9;--accent:#B4533A;--accent-ink:#FFFFFF;--note:#F6E2D8;--note-ink:#5A2A1C;
+  --r-md:20px;--r-sm:14px;--font:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color-scheme:light}
+:root[data-theme="dark"]{--bg:#1B1614;--surface:#272020;--ink:#F5ECE6;--muted:#BCA99E;--line:#3B302C;--line2:#5E4A42;--accent:#E28C70;--accent-ink:#2A140D;--note:#48302A;--note-ink:#FCE5DA;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.45 var(--font);-webkit-font-smoothing:antialiased;
+  padding:env(safe-area-inset-top) 0 calc(76px + env(safe-area-inset-bottom))}
+h1,h2,h3{margin:0;font-weight:650;letter-spacing:-.01em}
+h1{font-size:26px;line-height:1.15}
+h2{font-size:19px;margin:28px 0 10px}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0;text-align:left}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+.wrap{max-width:1080px;margin:0 auto;padding:18px 16px 28px}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+
+/* hlavička a menu */
+.head{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:1080px;margin:0 auto;padding:16px 16px 0}
+.brand{font-weight:700;font-size:18px;text-decoration:none}
+.menu{display:none;gap:22px;align-items:center}
+.menu a{text-decoration:none;color:var(--muted);font-weight:550}
+.menu a.on{color:var(--ink);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:6px;text-decoration-color:var(--accent)}
+.rezim{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;color:var(--muted)}
+.rezim svg{width:20px;height:20px}
+.dole{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
+  display:flex;justify-content:space-around;padding:8px 8px calc(8px + env(safe-area-inset-bottom));z-index:5}
+.dole a{flex:1;text-align:center;text-decoration:none;color:var(--muted);font-size:14px;font-weight:550;padding:8px 4px;border-radius:12px}
+.dole a.on{color:var(--ink);background:var(--note)}
+@media(min-width:800px){
+  body{padding-bottom:0}
+  .menu{display:flex}
+  .dole{display:none}
+}
+
+/* týden */
+.top{margin:10px 0 18px}
+.top p{margin:4px 0 0}
+.tyden{display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:620px){.tyden{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1000px){.tyden{grid-template-columns:repeat(4,1fr)}}
+.den{background:var(--surface);border-radius:var(--r-md);padding:14px 14px 10px;border:1.5px solid transparent}
+.den.dnes{border-color:var(--accent)}
+.den h3{font-size:16px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:8px}
+.den h3 span{font-weight:500;font-size:14px;color:var(--muted)}
+.varis{background:var(--note);color:var(--note-ink);border-radius:var(--r-sm);padding:10px 12px;margin:0 0 8px;font-size:15px}
+.varis b{display:block;font-size:13px;font-weight:650;margin-bottom:2px}
+.jidlo{display:block;padding:8px 0;border-top:1px solid var(--line);text-decoration:none}
+.jidlo:first-of-type{border-top:0}
+.jidlo .kdy{display:block;font-size:13px;color:var(--muted)}
+.jidlo .co{display:block;font-weight:500}
+a.jidlo .co{text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px}
+.jidlo .pozn{display:block;font-size:13px;color:var(--muted)}
+.volno{font-size:14px;color:var(--muted);padding:6px 0 4px;margin:0}
+
+/* nákup */
+.nakup{columns:1;column-gap:28px}
+@media(min-width:800px){.nakup{columns:2}}
+.skupina{break-inside:avoid;background:var(--surface);border-radius:var(--r-md);padding:12px 14px;margin:0 0 12px}
+.skupina h3{font-size:14px;color:var(--muted);font-weight:600;margin:2px 0 4px}
+.pol{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line);cursor:pointer}
+.skupina h3+.pol{border-top:0}
+.pol input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--accent);flex:none}
+.pol .nm{flex:1}
+.pol .mn{color:var(--muted);white-space:nowrap}
+.pol .pro{display:block;font-size:13px;color:var(--muted)}
+.pol.ok .nm,.pol.ok .mn{opacity:.45;text-decoration:line-through}
+details.spiz{margin-top:6px}
+details.spiz summary{cursor:pointer;font-weight:600;padding:8px 0;color:var(--muted)}
+.akce{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 16px}
+.btn{display:inline-flex;align-items:center;justify-content:center;background:var(--accent);color:var(--accent-ink);font-weight:600;border-radius:var(--r-sm);padding:11px 16px;min-height:44px}
+.btn.line{background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line2)}
+
+/* recepty */
+.karty{display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:620px){.karty{grid-template-columns:repeat(3,1fr)}}
+.karta{display:block;background:var(--surface);border-radius:var(--r-md);padding:16px;text-decoration:none}
+.karta .nm{display:block;font-weight:600;font-size:17px}
+.karta .meta{display:block;color:var(--muted);font-size:14px;margin-top:4px}
+.recept .zpet{display:inline-block;margin:6px 0 14px;color:var(--muted);text-decoration:none;font-weight:550}
+.recept .meta{margin:6px 0 0;color:var(--muted)}
+.recept .poznamka{background:var(--note);color:var(--note-ink);border-radius:var(--r-sm);padding:12px 14px;margin:16px 0 0;font-size:15px}
+.recept .poznamka p{margin:0}
+.recept .poznamka p+p{margin-top:6px}
+.dva{display:grid;gap:8px 32px}
+@media(min-width:800px){.dva{grid-template-columns:2fr 3fr}}
+.recept ul,.recept ol{margin:0;padding-left:20px}
+.recept li{margin:0 0 8px}
+.recept ul li span{color:var(--muted)}
+.recept ul li b{font-weight:600}
+.porce{display:flex;align-items:center;gap:10px;margin:0 0 8px}
+.porce button{width:36px;height:36px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--line2);text-align:center;font-size:18px}
+</style>
+</head>
+<body>
+<header class="head">
+  <a class="brand" href="#tyden">Molčuchyně</a>
+  <nav class="menu" aria-label="Menu">
+    <a href="#tyden" data-r="tyden">Týden</a>
+    <a href="#nakup" data-r="nakup">Nákup</a>
+    <a href="#recepty" data-r="recepty">Recepty</a>
+    <button class="rezim" type="button" aria-label="Přepnout světlý a tmavý režim" title="Přepnout režim"></button>
+  </nav>
+  <button class="rezim mobil" type="button" aria-label="Přepnout světlý a tmavý režim" title="Přepnout režim"></button>
+</header>
+<main class="wrap" id="obsah"></main>
+<nav class="dole" aria-label="Menu">
+  <a href="#tyden" data-r="tyden">Týden</a>
+  <a href="#nakup" data-r="nakup">Nákup</a>
+  <a href="#recepty" data-r="recepty">Recepty</a>
+</nav>
+
+<script>
+/* ===== Recepty =====
+   Suroviny: [klíč, množství na celý recept (číslo nebo null), poznámka].
+   Klíč odkazuje do SUROVINY, kde je název, jednotka a oddělení obchodu. */
+const SUROVINY = {
+  fleky:      { n: 'Fleky', j: 'g', o: 'Trvanlivé' },
+  uzene:      { n: 'Uzené maso (krkovice)', j: 'g', o: 'Lednice' },
+  vejce:      { n: 'Vejce', j: 'ks', o: 'Lednice' },
+  smetana:    { n: 'Smetana ke šlehání', j: 'ml', o: 'Lednice' },
+  jogurt:     { n: 'Bílý jogurt', j: 'g', o: 'Lednice' },
+  mleko:      { n: 'Mléko', j: 'ml', o: 'Lednice' },
+  cesnek:     { n: 'Česnek', j: 'stroužky', o: 'Ovoce a zelenina' },
+  petrzel:    { n: 'Petrželová nať', j: 'hrst', o: 'Ovoce a zelenina' },
+  jablko:     { n: 'Jablka', j: 'ks', o: 'Ovoce a zelenina' },
+  vlocky:     { n: 'Ovesné vločky', j: 'g', o: 'Trvanlivé' },
+  protlak:    { n: 'Rajský protlak', j: '', o: 'Trvanlivé' },
+  kecup:      { n: 'Kečup', j: '', o: 'Trvanlivé' },
+  okurky:     { n: 'Nakládané okurky', j: '', o: 'Trvanlivé' },
+  sadlo:      { n: 'Sádlo', j: '', o: 'Doma' },
+  strouhanka: { n: 'Strouhanka', j: '', o: 'Doma' },
+  sul:        { n: 'Sůl', j: '', o: 'Doma' },
+  pepr:       { n: 'Pepř', j: '', o: 'Doma' },
+  maslo:      { n: 'Máslo', j: '', o: 'Doma' },
+  mouka:      { n: 'Hladká mouka', j: '', o: 'Doma' },
+  krupice:    { n: 'Krupice nebo polohrubá mouka', j: '', o: 'Doma' },
+  bobkac:     { n: 'Bobkový list', j: '', o: 'Doma' },
+  noveKor:    { n: 'Nové koření', j: '', o: 'Doma' },
+  skorice:    { n: 'Skořice', j: '', o: 'Doma' },
+  cukr:       { n: 'Cukr', j: '', o: 'Doma' },
+};
+
+const RECEPTY = {
+  sunkofleky: {
+    nazev: 'Šunkofleky', kratce: 'Šunkofleky', porce: 4, cas: '55 min', lednice: 'večeře a druhý den oběd',
+    suroviny: [
+      ['fleky', 500], ['uzene', 200, 'nakrájet na menší kousky'], ['vejce', 6], ['smetana', 250],
+      ['cesnek', 2], ['petrzel', 1], ['sadlo', null, 'na vymazání pekáče'], ['strouhanka', null, 'na vysypání pekáče'],
+      ['sul', null], ['pepr', null], ['okurky', null, 'k podávání'],
+    ],
+    postup: [
+      'Troubu předehřej na 170 °C. Pekáč vymaž sádlem a vysyp strouhankou.',
+      'Česnek prolisuj. Vejce rozmíchej se smetanou, mléko nepřidávej. Uzené maso nakrájej na menší kousky.',
+      'Fleky vař v osolené vodě do poloměkka: když mají na obalu 13 minut, stačí asi 8-9 minut. Slij.',
+      'Ještě teplé fleky smíchej s masem, petrželí, česnekem, lžičkou soli a špetkou pepře. Přidej vaječnou směs a promíchej.',
+      'Dej do pekáče a peč 35 minut. Potom nech 15 minut dojít ve vypnuté troubě.',
+      'Podávej s nakládanými okurkami.',
+    ],
+    poznamky: [
+      'Vyzkoušeno 29. 8. 2026: S Honzou jste se shodli, že stačí přibližně 200 g uzeniny. Použila jsi celou smetanu 250 g a mléko vůbec.',
+      'Nejlepší je zapéct fleky ještě teplé, ne ze studených těstovin.',
+    ],
+    zdroj: 'https://www.rohlik.cz/chef/71-sunkofleky',
+  },
+  rajska: {
+    nazev: 'Rajská polévka od maminky', kratce: 'Rajská', porce: null, cas: '30 min', lednice: 'večeře a druhý den oběd',
+    suroviny: [
+      ['maslo', null], ['mouka', null, 'lžíce na zásmažku'], ['protlak', null], ['kecup', null, 'trošku'],
+      ['bobkac', null], ['noveKor', null], ['skorice', null, 'lusk nebo čajová lžička mleté'], ['cukr', null, 'trošku'], ['sul', null],
+      ['vejce', 1, 'na kapání'], ['krupice', null, 'do kapání'],
+    ],
+    postup: [
+      'Máslo do hrnce, trošku rozpustit a přidat lžíci hladké mouky. Míchat, dokud není zásmažka mírně nažloutlá, nemusí být zlatá.',
+      'Na zásmažku naliju studenou vodu, promíchám a přidám rajský protlak, trošku kečupu, bobkáč, nové koření, sůl, lusk nebo čajovou lžičku mleté skořice a osladím troškou cukru. Vařit asi 20 minut.',
+      'Do vajíčka nasypu krupici nebo polohrubou mouku a špetku soli a do vroucí polévky naliju jako kapání. Nechám 5 minut provařit a hotovo.',
+    ],
+    poznamky: ['Cibule nemusí být, chutnalo ti víc bez ní.', 'Množství vaříš po paměti, proto u surovin nejsou.'],
+  },
+  oats: {
+    nazev: 'Overnight oats s jablkem a skořicí', kratce: 'Overnight oats', porce: 1, cas: '5 min', lednice: 'nachystat nejvýš na 2 dny dopředu',
+    suroviny: [['vlocky', 50], ['jogurt', 150], ['mleko', 80], ['jablko', 1], ['skorice', null, 'lžička']],
+    postup: [
+      'Večer smíchej vločky, jogurt, mléko a skořici ve sklenici.',
+      'Nastrouhej jablko, zamíchej a dej přes noc do lednice.',
+      'Ráno jen otevři a jez.',
+    ],
+    poznamky: ['Podle Kájina receptu z Nachystáno.'],
+  },
+};
+
+/* ===== Týden =====
+   Plán je společný pro všechny, kdo otevřou odkaz. Mění ho agent v tomto souboru.
+   vari: co se ten den uvaří (recept a počet porcí, ze kterých se počítá nákup).
+   jidla: co se jí; recept = odkaz na recept, od = kdo jídlo přinesl, pozn = drobnost navíc. */
+const TYDEN = {
+  od: '2026-11-15',
+  dny: [
+    { vari: [['rajska', null], ['oats', 2]],
+      jidla: [
+        { kdy: 'Oběd', co: 'Zapečené maso s bramborami', od: 'od maminky' },
+        { kdy: 'Večeře', recept: 'rajska' },
+      ] },
+    { jidla: [
+        { kdy: 'Snídaně', recept: 'oats', pozn: 'pro Helenu' },
+        { kdy: 'Oběd', recept: 'rajska', pozn: 'z neděle' },
+      ] },
+    { vari: [['sunkofleky', 4], ['oats', 2]],
+      jidla: [
+        { kdy: 'Snídaně', recept: 'oats', pozn: 'pro Helenu' },
+        { kdy: 'Večeře', recept: 'sunkofleky' },
+      ] },
+    { jidla: [
+        { kdy: 'Snídaně', recept: 'oats', pozn: 'pro Helenu' },
+        { kdy: 'Oběd', recept: 'sunkofleky', pozn: 'z úterý' },
+      ] },
+    { jidla: [{ kdy: 'Snídaně', recept: 'oats', pozn: 'pro Helenu' }] },
+    { jidla: [] },
+    { jidla: [] },
+  ],
+};
+
+/* ===== Pomocné ===== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const DNY = ['Neděle', 'Pondělí', 'Úterý', 'Středa', 'Čtvrtek', 'Pátek', 'Sobota'];
+const dnyTydne = () => TYDEN.dny.map((d, i) => {
+  const dt = new Date(TYDEN.od + 'T12:00:00'); dt.setDate(dt.getDate() + i);
+  return { ...d, dt };
+});
+const datum = dt => dt.getDate() + '. ' + (dt.getMonth() + 1) + '.';
+const stejnyDen = (a, b) => a.toDateString() === b.toDateString();
+const cislo = x => Math.round(x * 10) / 10;
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d } catch (e) { return d } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)) } catch (e) {} },
+};
+
+/* ===== Týden ===== */
+function vykresliTyden() {
+  const dnes = new Date();
+  const dny = dnyTydne();
+  const prvni = dny[0].dt, posledni = dny[dny.length - 1].dt;
+  let h = `<div class="top"><h1>Týden ${datum(prvni)} - ${datum(posledni)}</h1>
+    <p class="muted">Vaříme v neděli a v úterý večer. Co nic nemá, je volné pro jídlo od mamek nebo něco rychlého.</p></div><div class="tyden">`;
+  for (const d of dny) {
+    h += `<section class="den${stejnyDen(d.dt, dnes) ? ' dnes' : ''}"><h3>${DNY[d.dt.getDay()]}<span>${datum(d.dt)}</span></h3>`;
+    if (d.vari) {
+      h += `<p class="varis"><b>Vaříš</b>${d.vari.map(([id, p]) => esc(RECEPTY[id].kratce) + (p && RECEPTY[id].porce === 1 ? ' ×' + p : '')).join(', ')}</p>`;
+    }
+    if (!d.jidla.length) h += `<p class="volno">Volno</p>`;
+    for (const j of d.jidla) {
+      const nm = j.recept ? RECEPTY[j.recept].nazev : j.co;
+      const pozn = j.od || j.pozn || '';
+      const tag = j.recept ? `a href="#recept/${j.recept}"` : 'div';
+      h += `<${tag} class="jidlo"><span class="kdy">${esc(j.kdy)}</span><span class="co">${esc(nm)}</span>${pozn ? `<span class="pozn">${esc(pozn)}</span>` : ''}</${j.recept ? 'a' : 'div'}>`;
+    }
+    h += `</section>`;
+  }
+  $('#obsah').innerHTML = h + '</div>';
+}
+
+/* ===== Nákup ===== */
+function seznam() {
+  const pol = {};
+  for (const d of dnyTydne()) for (const [id, porce] of d.vari || []) {
+    const r = RECEPTY[id];
+    const krat = porce && r.porce ? porce / r.porce : 1;
+    for (const [k, m] of r.suroviny) {
+      const p = pol[k] || (pol[k] = { k, ...SUROVINY[k], m: 0, bezMnozstvi: false, pro: new Set() });
+      if (m == null) p.bezMnozstvi = true; else p.m += m * krat;
+      p.pro.add(r.kratce);
+    }
+  }
+  return Object.values(pol);
+}
+const KLIC_NAKUP = 'molcuchyne-nakup-' + TYDEN.od;
+function mnozstvi(p) {
+  if (!p.m) return '';
+  return cislo(p.m) + (p.j ? ' ' + p.j : '') + (p.bezMnozstvi ? ' a víc' : '');
+}
+function polozka(p, hotovo) {
+  const ok = hotovo.includes(p.k);
+  return `<label class="pol${ok ? ' ok' : ''}"><input type="checkbox" data-k="${p.k}"${ok ? ' checked' : ''}>
+    <span class="nm">${esc(p.n)}<span class="pro">${esc([...p.pro].join(', '))}</span></span><span class="mn">${esc(mnozstvi(p))}</span></label>`;
+}
+function vykresliNakup() {
+  const hotovo = store.get(KLIC_NAKUP, []);
+  const vse = seznam();
+  const oddeleni = ['Lednice', 'Ovoce a zelenina', 'Trvanlivé'];
+  let h = `<div class="top"><h1>Nákup</h1><p class="muted">Na neděli a úterý. Jídlo od mamek už je odečtené.</p></div>
+    <div class="akce"><button class="btn" id="kopirovat" type="button">Zkopírovat seznam</button></div><div class="nakup">`;
+  for (const o of oddeleni) {
+    const v = vse.filter(p => p.o === o);
+    if (v.length) h += `<div class="skupina"><h3>${o}</h3>${v.map(p => polozka(p, hotovo)).join('')}</div>`;
+  }
+  h += `</div>`;
+  const doma = vse.filter(p => p.o === 'Doma');
+  if (doma.length) h += `<details class="spiz"><summary>Doma nejspíš máš (${doma.length})</summary><div class="skupina">${doma.map(p => polozka(p, hotovo)).join('')}</div></details>`;
+  $('#obsah').innerHTML = h;
+  $('#obsah').querySelectorAll('input[data-k]').forEach(i => i.addEventListener('change', () => {
+    const s = new Set(store.get(KLIC_NAKUP, []));
+    i.checked ? s.add(i.dataset.k) : s.delete(i.dataset.k);
+    store.set(KLIC_NAKUP, [...s]);
+    i.closest('.pol').classList.toggle('ok', i.checked);
+  }));
+  $('#kopirovat').addEventListener('click', async e => {
+    const hot = store.get(KLIC_NAKUP, []);
+    const text = vse.filter(p => p.o !== 'Doma' && !hot.includes(p.k)).map(p => '- ' + p.n + (mnozstvi(p) ? ' ' + mnozstvi(p) : '')).join('\n');
+    try { await navigator.clipboard.writeText(text); e.target.textContent = 'Zkopírováno'; }
+    catch (err) { e.target.textContent = 'Kopírování nejde'; }
+    setTimeout(() => e.target.textContent = 'Zkopírovat seznam', 2000);
+  });
+}
+
+/* ===== Recepty ===== */
+function vykresliRecepty() {
+  let h = `<div class="top"><h1>Recepty</h1><p class="muted">Co je tento týden v plánu.</p></div><div class="karty">`;
+  for (const [id, r] of Object.entries(RECEPTY)) {
+    h += `<a class="karta" href="#recept/${id}"><span class="nm">${esc(r.nazev)}</span><span class="meta">${esc(r.cas)}${r.porce ? ', ' + r.porce + ' porce' : ''}</span></a>`;
+  }
+  $('#obsah').innerHTML = h + '</div>';
+}
+function vykresliRecept(id, porce) {
+  const r = RECEPTY[id];
+  if (!r) return vykresliRecepty();
+  const p = porce || r.porce;
+  const krat = r.porce ? p / r.porce : 1;
+  const sur = r.suroviny.map(([k, m, pozn]) => {
+    const s = SUROVINY[k];
+    const mn = m != null ? cislo(m * krat) + (s.j ? ' ' + s.j : '') : '';
+    return `<li>${esc(s.n)}${mn ? ' <b>' + esc(mn) + '</b>' : ''}${pozn ? ` <span>- ${esc(pozn)}</span>` : ''}</li>`;
+  }).join('');
+  let h = `<article class="recept"><a class="zpet" href="#recepty">Zpět na recepty</a><h1>${esc(r.nazev)}</h1>
+    <p class="meta">${esc(r.cas)}, v lednici: ${esc(r.lednice)}</p>
+    <div class="poznamka">${r.poznamky.map(t => `<p>${esc(t)}</p>`).join('')}</div>
+    <div class="dva"><section><h2>Suroviny</h2>`;
+  if (r.porce) h += `<div class="porce"><button type="button" data-p="${Math.max(1, p - 1)}" aria-label="Méně porcí">-</button><span>${p} ${p === 1 ? 'porce' : p < 5 ? 'porce' : 'porcí'}</span><button type="button" data-p="${p + 1}" aria-label="Víc porcí">+</button></div>`;
+  h += `<ul>${sur}</ul></section><section><h2>Postup</h2><ol>${r.postup.map(t => `<li>${esc(t)}</li>`).join('')}</ol>`;
+  if (r.zdroj) h += `<p class="small muted">Zdroj: <a href="${esc(r.zdroj)}" target="_blank" rel="noopener">${esc(new URL(r.zdroj).hostname)}</a></p>`;
+  h += `</section></div></article>`;
+  $('#obsah').innerHTML = h;
+  $('#obsah').querySelectorAll('[data-p]').forEach(b => b.addEventListener('click', () => {
+    history.replaceState(null, '', `#recept/${id}/${b.dataset.p}`); vykresliRecept(id, +b.dataset.p);
+  }));
+}
+
+/* ===== Navigace a režim ===== */
+function route() {
+  const [r, id, porce] = (location.hash.slice(1) || 'tyden').split('/');
+  const sekce = r === 'recept' ? 'recepty' : r;
+  document.querySelectorAll('[data-r]').forEach(a => a.classList.toggle('on', a.dataset.r === sekce));
+  if (r === 'nakup') vykresliNakup();
+  else if (r === 'recepty') vykresliRecepty();
+  else if (r === 'recept') vykresliRecept(id, porce ? +porce : null);
+  else vykresliTyden();
+  window.scrollTo(0, 0);
+}
+const SLUNCE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const MESIC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+function ikonaRezimu() {
+  const tmavy = document.documentElement.dataset.theme === 'dark';
+  document.querySelectorAll('.rezim').forEach(b => b.innerHTML = tmavy ? MESIC : SLUNCE);
+}
+document.querySelectorAll('.rezim').forEach(b => b.addEventListener('click', () => {
+  const novy = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = novy;
+  try { localStorage.setItem('molcuchyne-rezim', novy) } catch (e) {}
+  ikonaRezimu();
+}));
+ikonaRezimu();
+addEventListener('hashchange', route);
+route();
+</script>
+<style>@media(min-width:800px){.rezim.mobil{display:none}}</style>
+</body>
+</html>
