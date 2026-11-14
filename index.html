@@ -84,7 +84,9 @@ details.spiz summary{cursor:pointer;font-weight:600;padding:8px 0;color:var(--mu
 /* recepty */
 .karty{display:grid;gap:12px;grid-template-columns:1fr}
 @media(min-width:620px){.karty{grid-template-columns:repeat(3,1fr)}}
-.karta{display:block;background:var(--surface);border-radius:var(--r-md);padding:16px;text-decoration:none}
+.karta{display:block;background:var(--surface);border-radius:var(--r-md);padding:16px;text-decoration:none;overflow:hidden}
+.karta img{display:block;width:calc(100% + 32px);margin:-16px -16px 14px;aspect-ratio:4/3;object-fit:cover}
+.recept .foto{display:block;max-width:100%;max-height:520px;width:auto;height:auto;border-radius:var(--r-md);margin:0 0 18px}
 .karta .nm{display:block;font-weight:600;font-size:17px}
 .karta .meta{display:block;color:var(--muted);font-size:14px;margin-top:4px}
 .recept .zpet{display:inline-block;margin:6px 0 14px;color:var(--muted);text-decoration:none;font-weight:550}
@@ -153,7 +155,7 @@ const SUROVINY = {
 
 const RECEPTY = {
   sunkofleky: {
-    nazev: 'Šunkofleky', kratce: 'Šunkofleky', porce: 4, cas: '55 min', lednice: 'večeře a druhý den oběd',
+    nazev: 'Šunkofleky', kratce: 'Šunkofleky', foto: 'fotky/sunkofleky.jpg', porce: 4, cas: '55 min', lednice: 'večeře a druhý den oběd',
     suroviny: [
       ['fleky', 500], ['uzene', 200, 'nakrájet na menší kousky'], ['vejce', 6], ['smetana', 250],
       ['cesnek', 2], ['petrzel', 1], ['sadlo', null, 'na vymazání pekáče'], ['strouhanka', null, 'na vysypání pekáče'],
@@ -174,7 +176,7 @@ const RECEPTY = {
     zdroj: 'https://www.rohlik.cz/chef/71-sunkofleky',
   },
   rajska: {
-    nazev: 'Rajská polévka od maminky', kratce: 'Rajská', porce: null, cas: '30 min', lednice: 'večeře a druhý den oběd',
+    nazev: 'Rajská polévka od maminky', kratce: 'Rajská', foto: 'fotky/rajska.jpg', porce: null, cas: '30 min', lednice: 'večeře a druhý den oběd',
     suroviny: [
       ['maslo', null], ['mouka', null, 'lžíce na zásmažku'], ['protlak', null], ['kecup', null, 'trošku'],
       ['bobkac', null], ['noveKor', null], ['skorice', null, 'lusk nebo čajová lžička mleté'], ['cukr', null, 'trošku'], ['sul', null],
@@ -298,7 +300,7 @@ function vykresliNakup() {
   const hotovo = store.get(KLIC_NAKUP, []);
   const vse = seznam();
   const oddeleni = ['Lednice', 'Ovoce a zelenina', 'Trvanlivé'];
-  let h = `<div class="top"><h1>Nákup</h1><p class="muted">Na neděli a úterý. Jídlo od mamek už je odečtené.</p></div>
+  let h = `<div class="top"><h1>Nákup</h1></div>
     <div class="akce"><button class="btn" id="kopirovat" type="button">Zkopírovat seznam</button></div><div class="nakup">`;
   for (const o of oddeleni) {
     const v = vse.filter(p => p.o === o);
@@ -327,7 +329,7 @@ function vykresliNakup() {
 function vykresliRecepty() {
   let h = `<div class="top"><h1>Recepty</h1><p class="muted">Co je tento týden v plánu.</p></div><div class="karty">`;
   for (const [id, r] of Object.entries(RECEPTY)) {
-    h += `<a class="karta" href="#recept/${id}"><span class="nm">${esc(r.nazev)}</span><span class="meta">${esc(r.cas)}${r.porce ? ', ' + r.porce + ' porce' : ''}</span></a>`;
+    h += `<a class="karta" href="#recept/${id}">${r.foto ? `<img src="${esc(r.foto)}" alt="" loading="lazy" onerror="this.remove()">` : ''}<span class="nm">${esc(r.nazev)}</span><span class="meta">${esc(r.cas)}${r.porce ? ', ' + r.porce + ' porce' : ''}</span></a>`;
   }
   $('#obsah').innerHTML = h + '</div>';
 }
@@ -341,7 +343,7 @@ function vykresliRecept(id, porce) {
     const mn = m != null ? cislo(m * krat) + (s.j ? ' ' + s.j : '') : '';
     return `<li>${esc(s.n)}${mn ? ' <b>' + esc(mn) + '</b>' : ''}${pozn ? ` <span>- ${esc(pozn)}</span>` : ''}</li>`;
   }).join('');
-  let h = `<article class="recept"><a class="zpet" href="#recepty">Zpět na recepty</a><h1>${esc(r.nazev)}</h1>
+  let h = `<article class="recept"><a class="zpet" href="#recepty">Zpět na recepty</a>${r.foto ? `<img class="foto" src="${esc(r.foto)}" alt="${esc(r.nazev)}" onerror="this.remove()">` : ''}<h1>${esc(r.nazev)}</h1>
     <p class="meta">${esc(r.cas)}, v lednici: ${esc(r.lednice)}</p>
     <div class="poznamka">${r.poznamky.map(t => `<p>${esc(t)}</p>`).join('')}</div>
     <div class="dva"><section><h2>Suroviny</h2>`;
