@@ -125,7 +125,13 @@ const PrikrmyApp = (() => {
     return out;
   }
   function top(tab){return `<div class="top"><h1>Příkrmy pro Aničku</h1><p class="muted">Plán, první chutě a malé pokroky.</p></div><nav class="p-tabs" aria-label="Příkrmy">${[['plan','Plán'],['foods','Potraviny'],['diary','Deník'],['recipes','Recepty'],['freezer','Mrazák'],['backup','Záloha']].map(([id,n])=>`<a href="#prikrmy/${id}" ${id===tab?'aria-current="page"':''}>${n}</a>`).join('')}</nav>${problem?`<p role="alert" class="p-warning">${e(problem)}</p>`:''}`;}
-  function frame(tab,html) {document.querySelector('#obsah').innerHTML=top(tab)+html;}
+  function frame(tab,html) {
+    history.replaceState(null,'','#prikrmy/'+tab);
+    const root=document.querySelector('#obsah');root.innerHTML=top(tab)+html;
+    root.querySelectorAll('a[href^="#prikrmy/"]').forEach(a=>a.addEventListener('click',ev=>{
+      if(a.hash===location.hash){ev.preventDefault();render(tab);}
+    }));
+  }
   function planView() {
     const s=read();let h=`<div class="p-toolbar">${button('Naplánovat na dva dny','id="p-add-plan"')}${button('Zapsat jiné jídlo','id="p-add-log"')}</div><p class="small muted">Plán se do ochutnávek zapíše až po tvém potvrzení. Zápisy jsou jen v tomto prohlížeči.</p><div class="p-week">`;
     const start=today()<TYDEN.od?TYDEN.od:today();
