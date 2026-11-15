@@ -145,8 +145,7 @@ function radekAnicky(id, d) {
   const plan = PrikrmyApp.core.read().plans.find(p => p.date === id);
   if (plan) {
     const r = PrikrmyApp.core.recipes.find(x => x.id === plan.recipeId);
-    return radekJidla({odkaz:'#prikrmy/plan', foto:r?.photo, ikona:r?.photo ? '' : IKONA_LZICKA, kdy:'Anička', nazev:plan.title,
-      akce:`<button class="btn line male" type="button" data-p-log="${esc(plan.id)}">Zapsat</button>`});
+    return radekJidla({odkaz:'#prikrmy/plan', foto:r?.photo, ikona:r?.photo ? '' : IKONA_LZICKA, kdy:'Anička', nazev:plan.title});
   }
   const navrh = d?.prikrmNavrh ? d.prikrmNavrh.split('. ')[0].replace(/\.$/, '') : '';
   return radekJidla({odkaz:`#prikrmy/new/${id}`, ikona:IKONA_LZICKA, kdy:'Anička', nazev: navrh || 'Naplánovat příkrm', pozn: navrh ? 'naplánovat' : ''});

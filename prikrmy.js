@@ -129,7 +129,7 @@ const PrikrmyApp = (() => {
   function planFor(s,date){return s.plans.find(p=>p.date===date);}
   function dayCard(date) {
     const s=read(),p=planFor(s,date);
-    return `<div class="p-day"><span class="kdy">Anička</span>${p?`<a href="#prikrmy/plan"><b>${e(p.title)}</b></a><span class="small muted">${{fresh:'Připravit',fridge:'Druhá porce',frozen:'Z mrazáku'}[p.source]}</span>${flags(s,p.foods)}${p.servingNote?`<p class="small muted">${e(p.servingNote)}</p>`:''}${button('Zapsat',`data-p-log="${e(p.id)}"`)}${p.source==='fresh'&&!s.batches.find(b=>b.id===p.batchId)?.preparedAt?button('Potvrdit přípravu',`data-p-prep="${e(p.id)}"`):''}`:`<a href="#prikrmy/new/${e(date)}">Naplánovat příkrm</a>`}</div>`;
+    return `<div class="p-day"><span class="kdy">Anička</span>${p?`<a href="#prikrmy/plan"><b>${e(p.title)}</b></a><span class="small muted">${{fresh:'Připravit',fridge:'Druhá porce',frozen:'Z mrazáku'}[p.source]}</span>${flags(s,p.foods)}${p.servingNote?`<p class="small muted">${e(p.servingNote)}</p>`:''}${p.source==='fresh'&&!s.batches.find(b=>b.id===p.batchId)?.preparedAt?button('Potvrdit přípravu',`data-p-prep="${e(p.id)}"`):''}`:`<a href="#prikrmy/new/${e(date)}">Naplánovat příkrm</a>`}</div>`;
   }
   function bindDayButtons(root=document) {
     root.querySelectorAll('[data-p-log]').forEach(b=>b.onclick=()=>logForm(b.dataset.pLog));
@@ -143,7 +143,7 @@ const PrikrmyApp = (() => {
     }
     return out;
   }
-  function top(tab){return `<div class="top"><h1>Příkrmy pro Aničku</h1><p class="muted">Plán, první chutě a malé pokroky.</p></div><nav class="p-tabs" aria-label="Příkrmy">${[['plan','Plán'],['foods','Potraviny'],['diary','Deník'],['recipes','Recepty'],['guide','Co kdy zavádět'],['freezer','Mrazák'],['backup','Záloha']].map(([id,n])=>`<a href="#prikrmy/${id}" ${id===tab?'aria-current="page"':''}>${n}</a>`).join('')}</nav>${problem?`<p role="alert" class="p-warning">${e(problem)}</p>`:''}`;}
+  function top(tab){return `<div class="top"><h1>Příkrmy pro Aničku</h1><p class="muted">Plán, první chutě a malé pokroky.</p></div><nav class="p-tabs" aria-label="Příkrmy">${[['plan','Plán'],['foods','Potraviny'],['recipes','Recepty'],['guide','Co kdy zavádět'],['freezer','Mrazák']].map(([id,n])=>`<a href="#prikrmy/${id}" ${id===tab?'aria-current="page"':''}>${n}</a>`).join('')}</nav>${problem?`<p role="alert" class="p-warning">${e(problem)}</p>`:''}`;}
   function frame(tab,html,detail='') {
     history.replaceState(null,'','#prikrmy/'+(detail?'recipe/'+encodeURIComponent(detail):tab));
     const root=document.querySelector('#obsah');root.innerHTML=top(tab)+(notice?`<p class="p-feedback" id="p-feedback" role="status" tabindex="-1">${e(notice)}</p>`:'')+html;notice='';
@@ -153,10 +153,10 @@ const PrikrmyApp = (() => {
     }));
   }
   function planView() {
-    const s=read();let h=`<div class="p-toolbar">${button('Naplánovat na dva dny','id="p-add-plan"')}${button('Zapsat jiné jídlo','id="p-add-log"')}</div><p class="small muted">Plán se do ochutnávek zapíše až po tvém potvrzení. Zápisy jsou jen v tomto prohlížeči.</p>${backupStatus()}<div class="p-week">`;
+    const s=read();let h=`<div class="p-toolbar">${button('Naplánovat na dva dny','id="p-add-plan"')}</div><div class="p-week">`;
     const start=today()<TYDEN.od?TYDEN.od:today();
     for(let i=0;i<7;i++){const date=next(start,i),p=planFor(s,date);h+=`<section class="p-panel"><h2>${new Date(date+'T12:00:00').toLocaleDateString('cs-CZ',{weekday:'long',day:'numeric',month:'numeric'})}</h2>${dayCard(date)}${p?`<p class="small muted">${e(batchWarning(s,p,new Date(date+'T12:00:00').getTime()))}</p>`:''}</section>`;}
-    frame('plan',h+'</div>');document.querySelector('#p-add-plan').onclick=()=>planForm();document.querySelector('#p-add-log').onclick=()=>logForm();bindDayButtons();
+    frame('plan',h+'</div>');document.querySelector('#p-add-plan').onclick=()=>planForm();bindDayButtons();
   }
   function planForm(recipeId='',selectedDate='') {
     const s=read();
