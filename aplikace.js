@@ -1,4 +1,4 @@
-/* Molčuchyně: společný přehled C, denní detail B, kuchařka z vaultu. */
+/* Mňamčíci: společný přehled C, denní detail B, kuchařka z vaultu. */
 const normalizuj = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 const DATUMY = () => dnyTydne().map(d => PrikrmyApp.core.localDate(d.dt));
 const JMENO_JIDLA = j => j.recept ? (RECEPTY[j.recept]?.kratce || RECEPTY[j.recept]?.nazev || j.recept) : j.co;
