@@ -143,7 +143,8 @@ a.karta:hover .nm{color:var(--accent)}
 .porce button:hover{box-shadow:inset 0 0 0 1.5px var(--accent)}
 .recept a{text-decoration-color:var(--line2);text-underline-offset:3px}
 </style>
-<link rel="stylesheet" href="prikrmy.css">
+<link rel="stylesheet" href="prikrmy.css?v=a7e2133428">
+<link rel="stylesheet" href="vzhled.css?v=f479ac4dc0">
 </head>
 <body>
 <header class="head">
@@ -165,7 +166,9 @@ a.karta:hover .nm{color:var(--accent)}
   <a href="#prikrmy" data-r="prikrmy">Příkrmy</a>
 </nav>
 
-<script src="prikrmy.js"></script>
+<script src="prikrmy-recepty.js?v=c3ff4ba61a"></script>
+<script src="prikrmy-recepty.js?v=c3ff4ba61a"></script>
+<script src="prikrmy.js?v=e80e5e16b0"></script>
 <script>
 /* ===== Recepty =====
    Suroviny: [klíč, množství na celý recept (číslo nebo null), poznámka].
@@ -273,6 +276,7 @@ const TYDEN = {
   od: '2026-11-15',
   dny: [
     { vari: [['rajska', null], ['oats', 2]],
+      prikrmNavrh: 'Zelenina s vařenou hruškou nebo jablkem. Konkrétní kombinaci ještě vybereme.',
       jidla: [
         { kdy: 'Oběd', co: 'Zapečené maso s bramborami', od: 'od maminky' },
         { kdy: 'Večeře', recept: 'rajska' },
@@ -393,8 +397,8 @@ function seznam() {
   }
   for (const item of PrikrmyApp.shopping()) {
     const k = SUROVINY[item.id] ? item.id : 'prikrm-' + item.id;
-    const p = pol[k] || (pol[k] = {k, n:item.name, j:'', o:'Ovoce a zelenina', m:0, bezMnozstvi:true, pro:new Set()});
-    if (!SUROVINY[item.id]) p.o = ['kure','hovezi','ryba'].includes(item.id) ? 'Lednice' : ['ryze','cocka','arasid','mandle','sezam','soja','psenice'].includes(item.id) ? 'Trvanlivé' : 'Ovoce a zelenina';
+    const s = SUROVINY[item.id];
+    const p = pol[k] || (pol[k] = {k, n:s?.n || item.name, j:s?.j || '', o:s?.o || item.group || 'Ovoce a zelenina', m:0, bezMnozstvi:true, pro:new Set()});
     p.bezMnozstvi = true;
     p.pro.add('Anička: ' + item.title);
   }
@@ -472,16 +476,17 @@ function vykresliRecept(id, porce) {
 }
 
 /* ===== Příkrmy ===== */
-function vykresliPrikrmy(tab) { PrikrmyApp.render(tab); }
+function vykresliPrikrmy(tab,id) { PrikrmyApp.render(tab,id); }
 
 /* ===== Navigace a režim ===== */
 function route() {
   const [r, id, porce] = (location.hash.slice(1) || 'tyden').split('/');
-  const sekce = r === 'recept' ? 'recepty' : r;
+  const sekce = r === 'recept' ? 'recepty' : r === 'den' ? 'tyden' : r;
   document.querySelectorAll('[data-r]').forEach(a => a.classList.toggle('on', a.dataset.r === sekce));
   if (r === 'nakup') vykresliNakup();
   else if (r === 'recepty') vykresliRecepty();
-  else if (r === 'prikrmy') vykresliPrikrmy(id);
+  else if (r === 'den') vykresliDen(id);
+  else if (r === 'prikrmy') vykresliPrikrmy(id,porce);
   else if (r === 'recept') vykresliRecept(id, porce ? +porce : null);
   else vykresliTyden();
   window.scrollTo(0, 0);
@@ -502,8 +507,9 @@ ikonaRezimu();
 // klik myší na položku menu nenechá na odkazu focus, ring zůstane jen pro klávesnici
 document.querySelectorAll('.menu a, .dole a, .brand').forEach(a => a.addEventListener('mousedown', e => e.preventDefault()));
 addEventListener('hashchange', route);
-route();
 </script>
+<script src="kucharka.js?v=179cc23efc"></script>
+<script src="aplikace.js?v=f3436735e4"></script>
 <style>@media(min-width:800px){.rezim.mobil{display:none}}</style>
 </body>
 </html>

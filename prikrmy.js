@@ -3,23 +3,12 @@ const PrikrmyApp = (() => {
   'use strict';
   const KEY = 'molcuchyne-prikrmy-v1';
   const empty = () => ({version:1, plans:[], batches:[], stock:[], logs:[], foods:[]});
-  const catalog = [
-    ['dyne','Máslová dýně'],['hokkaido','Dýně hokkaido'],['hruska','Hruška'],['jablko','Jablko'],
-    ['batat','Batát'],['brokolice','Brokolice'],['cuketa','Cuketa'],['mrkev','Mrkev'],['brambor','Brambory'],
-    ['kure','Kuřecí maso'],['hovezi','Hovězí maso'],['ryze','Rýže'],['cocka','Čočka'],
-    ['vejce','Vejce','Vejce'],['jogurt','Bílý jogurt','Mléko'],['mleko','Mléko','Mléko'],
-    ['psenice','Pšenice','Lepek'],['vlocky','Ovesné vločky','Lepek'],['ryba','Ryba','Ryby'],
-    ['arasid','Arašídy','Arašídy'],['mandle','Mandle','Skořápkové plody'],['sezam','Sezam','Sezam'],
-    ['soja','Sója','Sója'],['celer','Celer','Celer'],['horcice','Hořčice','Hořčice']
-  ].map(([id,name,allergen])=>({id,name,allergen:allergen||''}));
-  const recipes = [
-    {id:'dyne-hruska',name:'Máslová dýně s hruškou',foods:['dyne','hruska'],photo:'fotky/prikrm-dyne-hruska.png'},
-    {id:'hokkaido-jablko',name:'Hokkaido s jablkem',foods:['hokkaido','jablko'],photo:'fotky/prikrm-hokkaido-jablko.png'},
-    {id:'batat-jablko',name:'Batát s jablkem',foods:['batat','jablko'],photo:'fotky/prikrm-batat-jablko.png'},
-    {id:'brokolice-hruska',name:'Brokolice s hruškou',foods:['brokolice','hruska'],photo:'fotky/prikrm-brokolice-hruska.png'},
-    {id:'cuketa-hruska',name:'Cuketa s hruškou',foods:['cuketa','hruska']},
-    {id:'mrkev-jablko',name:'Mrkev s jablkem',foods:['mrkev','jablko'],photo:'fotky/prikrm-mrkev-jablko.png'}
-  ];
+  const library = globalThis.PRIKRMY_KNIHOVNA;
+  if (!library) throw Error('Knihovna příkrmů se nenačetla. Obnov stránku.');
+  const catalog = library.foods;
+  const recipes = library.recipes;
+  let recipeSearch = '', recipeAge = '', onlyKnown = false;
+  const ageMatches = (recipe, age) => age === '' || recipe.minMonths <= Number(age);
   const e = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const uid = () => crypto.randomUUID();
   const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -47,6 +36,7 @@ const PrikrmyApp = (() => {
         if(!str(x.title,300)||!x.title.trim()||!Array.isArray(x.foods)||x.foods.length>100||!x.foods.every(f=>str(f,100)))throw Error('Neplatné složení jídla.');
         if(key==='stock') {if(!stamp(x.preparedAt)||!x.preparedAt||!stamp(x.frozenAt)||!x.frozenAt||!str(x.usedBy,100))throw Error('Neplatná porce v mrazáku.');}
         else if(!date(x.date))throw Error('Neplatné datum jídla.');
+        if (x.recipeId !== undefined && !str(x.recipeId,100) || x.servingNote !== undefined && !str(x.servingNote,600)) throw Error('Neplatné doplňující údaje receptu.');
         if(key==='plans'&&(!['fresh','fridge','frozen'].includes(x.source)||!str(x.batchId,100)||!str(x.stockId,100)))throw Error('Neplatný plán.');
         if(key==='logs'&&(!time(x.time)||!['offered','tasted','ate','unknown'].includes(x.result)||!['unknown','none','symptom'].includes(x.reaction)||!str(x.note,3000)||!str(x.amount,100)||!stamp(x.onset)||!stamp(x.thawedAt)||!str(x.planId,100)||!str(x.stockId,100)||!str(x.batchId,100)||!str(x.source,20)))throw Error('Neplatná ochutnávka.');
       }
@@ -103,6 +93,8 @@ const PrikrmyApp = (() => {
     form.elements.recipe?.addEventListener('change',()=>{
       const r=recipes.find(r=>r.id===form.elements.recipe.value);if(!r)return;
       form.elements.title.value=r.name;
+      const info=form.querySelector('[data-recipe-info]');
+      if(info)info.innerHTML=`<p class="p-tag">Od ukončených ${r.minMonths} měsíců</p><p>${e(r.ageSource)}</p>${r.servingNote?`<p class="p-warning">${e(r.servingNote)}</p>`:''}<p class="small muted">Recept může obsahovat volitelné suroviny. Před zápisem uprav skutečné složení.</p>`;
       form.querySelectorAll('[name="foods"]').forEach(i=>i.checked=r.foods.includes(i.value));
     });
   }
@@ -110,7 +102,7 @@ const PrikrmyApp = (() => {
   function planFor(s,date){return s.plans.find(p=>p.date===date);}
   function dayCard(date) {
     const s=read(),p=planFor(s,date);
-    return `<div class="p-day"><span class="kdy">Anička</span>${p?`<a href="#prikrmy/plan"><b>${e(p.title)}</b></a><span class="small muted">${{fresh:'Připravit',fridge:'Druhá porce',frozen:'Z mrazáku'}[p.source]}</span>${flags(s,p.foods)}${button('Zapsat',`data-p-log="${e(p.id)}"`)}${p.source==='fresh'&&!s.batches.find(b=>b.id===p.batchId)?.preparedAt?button('Potvrdit přípravu',`data-p-prep="${e(p.id)}"`):''}`:`<a href="#prikrmy/plan">Naplánovat příkrm</a>`}</div>`;
+    return `<div class="p-day"><span class="kdy">Anička</span>${p?`<a href="#prikrmy/plan"><b>${e(p.title)}</b></a><span class="small muted">${{fresh:'Připravit',fridge:'Druhá porce',frozen:'Z mrazáku'}[p.source]}</span>${flags(s,p.foods)}${p.servingNote?`<p class="small muted">${e(p.servingNote)}</p>`:''}${button('Zapsat',`data-p-log="${e(p.id)}"`)}${p.source==='fresh'&&!s.batches.find(b=>b.id===p.batchId)?.preparedAt?button('Potvrdit přípravu',`data-p-prep="${e(p.id)}"`):''}`:`<a href="#prikrmy/plan">Naplánovat příkrm</a>`}</div>`;
   }
   function bindDayButtons(root=document) {
     root.querySelectorAll('[data-p-log]').forEach(b=>b.onclick=()=>logForm(b.dataset.pLog));
@@ -120,13 +112,13 @@ const PrikrmyApp = (() => {
     const s=read(), seen=new Set(), out=[];
     for(const p of s.plans.filter(p=>p.date>=TYDEN.od&&p.date<next(TYDEN.od,7)&&p.source==='fresh')){
       if(seen.has(p.batchId))continue;seen.add(p.batchId);
-      for(const id of p.foods){const f=food(s,id);out.push({id,name:f.name,title:p.title});}
+      for(const id of p.foods){const f=food(s,id);out.push({id,name:f.name,group:f.group||'Ovoce a zelenina',title:p.title});}
     }
     return out;
   }
-  function top(tab){return `<div class="top"><h1>Příkrmy pro Aničku</h1><p class="muted">Plán, první chutě a malé pokroky.</p></div><nav class="p-tabs" aria-label="Příkrmy">${[['plan','Plán'],['foods','Potraviny'],['diary','Deník'],['recipes','Recepty'],['freezer','Mrazák'],['backup','Záloha']].map(([id,n])=>`<a href="#prikrmy/${id}" ${id===tab?'aria-current="page"':''}>${n}</a>`).join('')}</nav>${problem?`<p role="alert" class="p-warning">${e(problem)}</p>`:''}`;}
-  function frame(tab,html) {
-    history.replaceState(null,'','#prikrmy/'+tab);
+  function top(tab){return `<div class="top"><h1>Příkrmy pro Aničku</h1><p class="muted">Plán, první chutě a malé pokroky.</p></div><nav class="p-tabs" aria-label="Příkrmy">${[['plan','Plán'],['foods','Potraviny'],['diary','Deník'],['recipes','Recepty'],['guide','Co kdy zavádět'],['freezer','Mrazák'],['backup','Záloha']].map(([id,n])=>`<a href="#prikrmy/${id}" ${id===tab?'aria-current="page"':''}>${n}</a>`).join('')}</nav>${problem?`<p role="alert" class="p-warning">${e(problem)}</p>`:''}`;}
+  function frame(tab,html,detail='') {
+    history.replaceState(null,'','#prikrmy/'+(detail?'recipe/'+encodeURIComponent(detail):tab));
     const root=document.querySelector('#obsah');root.innerHTML=top(tab)+html;
     root.querySelectorAll('a[href^="#prikrmy/"]').forEach(a=>a.addEventListener('click',ev=>{
       if(a.hash===location.hash){ev.preventDefault();render(tab);}
@@ -140,14 +132,16 @@ const PrikrmyApp = (() => {
   }
   function planForm(recipeId='') {
     const s=read();
-    frame('plan',`<form id="p-form" class="p-panel"><h2>Naplánovat příkrm</h2><div class="p-form-grid">${field('První den',`<input type="date" name="date" value="${today()<TYDEN.od?TYDEN.od:today()}" required>`)}${field('Recept',`<select name="recipe">${options()}</select>`)}${field('Název',text('title','',true))}${field('Příprava',`<select name="source"><option value="fresh">Uvařit na tento a následující den</option><option value="frozen">Jedna porce z mrazáku</option></select>`)}</div><div id="p-stock-choice" hidden>${field('Porce z mrazáku',`<select name="stockId"><option value="">Vyber porci</option>${s.stock.filter(x=>!x.usedBy&&!s.plans.some(p=>p.stockId===x.id)).map(x=>`<option value="${e(x.id)}">${e(x.title)} - zmrazeno ${showDate(x.frozenAt)}</option>`).join('')}</select>`)}</div>${selections(s)}<p class="small muted">Vyber skutečné složení. Nový alergen plánuj jednotlivě; ostatní suroviny by už měla znát. Vejce podávej důkladně tepelně upravené.</p><div class="p-toolbar"><button class="btn">Uložit plán</button><a href="#prikrmy/plan">Zpět</a></div></form>`);
+    frame('plan',`<form id="p-form" class="p-panel"><h2>Naplánovat příkrm</h2><div class="p-form-grid">${field('První den',`<input type="date" name="date" value="${today()<TYDEN.od?TYDEN.od:today()}" required>`)}${field('Recept',`<select name="recipe">${options()}</select>`)}${field('Název',text('title','',true))}${field('Příprava',`<select name="source"><option value="fresh">Uvařit na tento a následující den</option><option value="frozen">Jedna porce z mrazáku</option></select>`)}</div><div id="p-stock-choice" hidden>${field('Porce z mrazáku',`<select name="stockId"><option value="">Vyber porci</option>${s.stock.filter(x=>!x.usedBy&&!s.plans.some(p=>p.stockId===x.id)).map(x=>`<option value="${e(x.id)}">${e(x.title)} - zmrazeno ${showDate(x.frozenAt)}</option>`).join('')}</select>`)}</div><div data-recipe-info></div>${selections(s)}<p class="small muted">Vyber skutečné složení. Nový alergen plánuj jednotlivě; ostatní suroviny by už měla znát. Vejce podávej důkladně tepelně upravené.</p><div class="p-toolbar"><button class="btn">Uložit plán</button><a href="#prikrmy/plan">Zpět</a></div></form>`);
     const f=document.querySelector('#p-form');wireRecipe(f);
     f.elements.source.onchange=()=>document.querySelector('#p-stock-choice').hidden=f.elements.source.value!=='frozen';
     f.elements.stockId.onchange=()=>{const x=s.stock.find(x=>x.id===f.elements.stockId.value);if(!x)return;f.elements.title.value=x.title;f.querySelectorAll('[name="foods"]').forEach(i=>i.checked=x.foods.includes(i.value));};
     if(recipeId){f.elements.recipe.value=recipeId;f.elements.recipe.dispatchEvent(new Event('change'));}
     f.onsubmit=run(()=>{
       const state=read(),d=new FormData(f),date=d.get('date'),source=d.get('source');let title=d.get('title').trim(),ids=chosen(f),stockId='';
-      if(source==='frozen'){const x=state.stock.find(x=>x.id===d.get('stockId')&&!x.usedBy);if(!x||state.plans.some(p=>p.stockId===x.id))throw Error('Vyber volnou porci z mrazáku.');ids=x.foods;title=x.title;stockId=x.id;}
+      const selectedRecipe=recipes.find(r=>r.id===d.get('recipe'));
+      let servingNote=selectedRecipe?.servingNote||'',selectedRecipeId=selectedRecipe?.id||'';
+      if(source==='frozen'){const x=state.stock.find(x=>x.id===d.get('stockId')&&!x.usedBy);if(!x||state.plans.some(p=>p.stockId===x.id))throw Error('Vyber volnou porci z mrazáku.');ids=x.foods;title=x.title;stockId=x.id;servingNote=x.servingNote||'';selectedRecipeId=x.recipeId||'';}
       if(!ids.length||!title)throw Error('Vyplň název a složení.');
       const newAllergens=new Set(newFoods(state,ids).map(id=>food(state,id).allergen).filter(Boolean));
       if(newAllergens.size>1&&!confirm('V jídle je podle zdejšího deníku více nových alergenů. Doporučené je zavádět je jednotlivě. Přesto uložit tento plán?'))return;
@@ -156,7 +150,7 @@ const PrikrmyApp = (() => {
       const batchId=source==='fresh'?uid():'';
       if(batchId)state.batches.push({id:batchId,plannedDate:date,preparedAt:''});
       dates.forEach((date,i)=>{
-        const old=planFor(state,date),p={id:old?.id||uid(),date,title,foods:ids.slice(),source:source==='frozen'?'frozen':i?'fridge':'fresh',batchId,stockId};
+        const old=planFor(state,date),p={id:old?.id||uid(),date,title,foods:ids.slice(),source:source==='frozen'?'frozen':i?'fridge':'fresh',batchId,stockId,recipeId:selectedRecipeId,servingNote};
         if(old)state.plans[state.plans.indexOf(old)]=p;else state.plans.push(p);
       });write(state);render('plan');
     });
@@ -205,13 +199,36 @@ const PrikrmyApp = (() => {
     document.querySelector('#p-search').oninput=update;document.querySelector('#p-filter').onchange=update;update();
     document.querySelector('#p-food-form').onsubmit=run(ev=>{const d=new FormData(ev.target),state=read(),name=d.get('name').trim();if(!name)throw Error('Napiš název.');if(foods(state).some(f=>f.name.toLocaleLowerCase('cs')===name.toLocaleLowerCase('cs')))throw Error('Tato potravina už v přehledu je.');state.foods.push({id:'vlastni-'+uid(),name:name.slice(0,100),allergen:d.get('allergen').trim().slice(0,100)});write(state);render('foods');});
   }
+  function recipeCard(r,s) {
+    const allergens=[...new Set(r.foods.map(id=>food(s,id).allergen).filter(Boolean))];
+    return `<section class="karta p-recipe" data-recipe-id="${e(r.id)}">${r.photo?`<a href="#prikrmy/recipe/${e(r.id)}" tabindex="-1" aria-hidden="true"><img src="${e(r.photo)}" alt="" loading="lazy"></a>`:''}<p class="p-recipe-type">${e(r.category)}</p><h2><a href="#prikrmy/recipe/${e(r.id)}">${e(r.name)}</a></h2><p class="p-tag">Od ukončených ${r.minMonths} měsíců</p><p class="small muted">${e(r.sourceLabel)}</p><p>${e(r.foods.map(id=>food(s,id).name).join(', '))}</p>${allergens.length?`<p class="small"><b>Alergeny:</b> ${e(allergens.join(', '))}</p>`:''}${flags(s,r.foods)}<div class="p-card-actions"><a class="text-link" href="#prikrmy/recipe/${e(r.id)}">Suroviny a postup</a>${button('Naplánovat na dva dny',`data-p-recipe="${e(r.id)}"`)}</div></section>`;
+  }
   function recipesView() {
-    const s=read();frame('recipes',`<div class="karty">${recipes.map(r=>`<section class="karta">${r.photo?`<img src="${r.photo}" alt="${e(r.name)}" loading="lazy">`:''}<h2>${e(r.name)}</h2><p>${e(r.foods.map(id=>food(s,id).name).join(', '))}</p>${flags(s,r.foods)}<p class="small muted">Zeleninu i ovoce připrav do měkka. Rozmixuj na vhodnou konzistenci, bez soli a cukru.</p>${button('Naplánovat na dva dny',`data-p-recipe="${r.id}"`)}</section>`).join('')}</div><p class="small muted">Plán a evidenci jsme inspirovali aplikací <a href="https://solidstarts.com/app/" target="_blank" rel="noopener">Solid Starts</a>. Jde o vlastní rodinný nástroj.</p>`);
-    document.querySelectorAll('[data-p-recipe]').forEach(b=>b.onclick=()=>planForm(b.dataset.pRecipe));
+    const s=read();
+    frame('recipes',`<div class="p-toolbar">${field('Hledat recept nebo surovinu',`<input id="p-recipe-search" type="search" value="${e(recipeSearch)}" placeholder="Třeba polévka nebo cizrna">`)}${field('Věk dítěte - ukončené měsíce',`<select id="p-recipe-age"><option value="">Všechny věky</option>${[6,7,8,9,10,12].map(n=>`<option value="${n}" ${String(n)===recipeAge?'selected':''}>${n} měsíců - recepty pro tento věk i dříve</option>`).join('')}</select>`)}</div><label class="p-known"><input id="p-known" type="checkbox" ${onlyKnown?'checked':''}> Jen z potvrzeně ochutnaných surovin</label><p class="small muted">6+ znamená po ukončeném 6. měsíci. Věk je orientační; zohledni zvládání konzistence a jednotlivě zavedené alergeny. Přesné věkové doporučení zdroje najdeš v detailu.</p><p id="p-recipe-count" class="small muted" role="status"></p><div id="p-recipe-list" class="karty"></div><p class="small muted">Nové recepty: vlastní pracovní parafráze veřejných receptů <a href="${e(library.sources.ig)}" target="_blank" rel="noopener">Vaříme mrňouskům</a>. Přehled zavádění najdeš v <a href="#prikrmy/guide">Co kdy zavádět</a>.</p>`);
+    const update=()=>{
+      recipeSearch=document.querySelector('#p-recipe-search').value;recipeAge=document.querySelector('#p-recipe-age').value;onlyKnown=document.querySelector('#p-known').checked;
+      const norm=t=>t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      const list=recipes.filter(r=>ageMatches(r,recipeAge)&&(!onlyKnown||r.foods.every(id=>tried(s,id)))&&norm(r.name+' '+r.category+' '+r.foods.map(id=>food(s,id).name).join(' ')).includes(norm(recipeSearch.trim())));
+      document.querySelector('#p-recipe-count').textContent=`Zobrazeno ${list.length} z ${recipes.length} receptů`;
+      document.querySelector('#p-recipe-list').innerHTML=list.map(r=>recipeCard(r,s)).join('')||'<p>Pro tento výběr zatím žádný recept. Zkus jiný věk, surovinu nebo vypni filtr ochutnaných.</p>';
+      document.querySelectorAll('[data-p-recipe]').forEach(b=>b.onclick=()=>planForm(b.dataset.pRecipe));
+    };
+    document.querySelector('#p-recipe-search').oninput=update;document.querySelector('#p-recipe-age').onchange=update;document.querySelector('#p-known').onchange=update;update();
+  }
+  function recipeView(id) {
+    const r=recipes.find(r=>r.id===id);if(!r)return recipesView();const s=read();
+    frame('recipes',`<article class="recept p-detail"><a class="zpet" href="#prikrmy/recipes">Zpět na recepty pro Aničku</a>${r.photo?`<img class="foto" src="${e(r.photo)}" alt="${e(r.name)}">`:''}<h2>${e(r.name)}</h2><p class="p-tag">Od ukončených ${r.minMonths} měsíců</p><p class="small muted">${e(r.ageSource)}</p><p class="small muted">${e(r.sourceLabel)}${r.sourceUrl?` - <a href="${e(r.sourceUrl)}" target="_blank" rel="noopener">Otevřít původní recept</a>`:` - <a href="${e(r.ageUrl)}" target="_blank" rel="noopener">Věková orientace NHS</a>`}</p>${flags(s,r.foods)}<p><b>Alergeny:</b> ${e([...new Set(r.foods.map(id=>food(s,id).allergen).filter(Boolean))].join(', ')||'Ve složení není označen žádný běžný alergen; reakci může vyvolat i jiná potravina.')}</p>${r.servingNote?`<p class="p-warning">${e(r.servingNote)}</p>`:''}<div class="dva"><section><h3>Suroviny na celou přípravu</h3><ul>${r.ingredients.map(t=>`<li>${e(t)}</li>`).join('')}</ul></section><section><h3>Postup</h3><ol>${r.steps.map(t=>`<li>${e(t)}</li>`).join('')}</ol></section></div><section class="p-panel"><h3>Pro Aničku a dvoudenní vaření</h3>${r.notes.map(t=>`<p>${e(t)}</p>`).join('')}</section>${button('Naplánovat na dva dny',`data-p-recipe="${e(r.id)}"`)}</article>`,r.id);
+    // Zpět i při kliknutí na stejnou záložku musí zavřít detail.
+    document.querySelector('[data-p-recipe]').onclick=()=>planForm(r.id);
+  }
+  function guideView() {
+    const s=read();
+    frame('guide',`<section class="p-panel"><h2>Co kdy zavádět</h2><p>Osm témat ze série Vaříme mrňouskům a doplněk o mléčných výrobcích z tvého snímku. Číslo označuje díl série, ne měsíc ani povinné pořadí.</p><p class="small muted">Zpracováno z dodaného snímku. Nejde o přepis osmi videí. Souhrn témat autorky doplňují ověřené poznámky pro použití v naší aplikaci.</p><p>Začátek kolem 6 měsíců závisí také na připravenosti dítěte. Jednotlivé nové alergeny zkoušej v malém množství zvlášť. Při toleranci je dál běžně nabízej; při podezření na reakci řeš další postup s pediatrem.</p><p class="small muted">Podklad: <a href="${e(library.sources.ig)}" target="_blank" rel="noopener">profil autorky</a>. Věkové souvislosti: <a href="${e(library.sources.nhs)}" target="_blank" rel="noopener">NHS - od 6 měsíců</a>, <a href="${e(library.sources.allergy)}" target="_blank" rel="noopener">NHS - alergeny</a>.</p></section><div class="p-guide">${library.guide.map(g=>{const known=g.foods.filter(id=>tried(s,id));return `<section class="p-panel"><div class="p-guide-title"><span class="p-step">${g.number}</span><h2>${e(g.title)}${g.number===9?' - doplněk':''}</h2></div><p class="small muted">Téma autorky: ${e(g.source)}</p><p>${e(g.practice)}</p><p class="small"><b>Věková orientace:</b> kolem ukončených 6 měsíců v odpovídající úpravě${g.number===9?'; mléko jako hlavní nápoj až od 12 měsíců':''}.</p><p class="${known.length?'p-new':'muted'}">${known.length?'V deníku ochutnala: '+e(known.map(id=>food(s,id).name).join(', ')):'Zatím bez potvrzené ochutnávky v této skupině.'}</p><a href="#prikrmy/foods">Prohlédnout potraviny a zápisy</a></section>`;}).join('')}</div><p class="small muted">Počty ani pořadí nepředstavují splněný zdravotní test. Ochutnání je odvozené ze skutečných zápisů, nikoli z plánu.</p>`);
   }
   function freezerView() {
-    const s=read();frame('freezer',`<p class="small muted">Každá položka je jedna samostatná porce. V plánu ji vybereš přes „Jedna porce z mrazáku“.</p>${s.stock.filter(x=>!x.usedBy).map(x=>`<section class="p-panel"><h2>${e(x.title)}</h2><p>Připraveno ${showDate(x.preparedAt)}, zamrazeno ${showDate(x.frozenAt)}</p><p class="muted">${s.plans.some(p=>p.stockId===x.id)?'Rezervováno v plánu':'Volná porce'}</p></section>`).join('')||'<p>Mrazák zatím nemá žádné zapsané porce.</p>'}<details class="p-panel"><summary>Přidat porce do mrazáku</summary><form id="p-form"><div class="p-form-grid">${field('Recept',`<select name="recipe">${options()}</select>`)}${field('Název',text('title','',true))}${field('Skutečný čas přípravy',`<input name="prepared" type="datetime-local" required>`)}${field('Skutečný čas zamrazení',`<input name="frozen" type="datetime-local" value="${dtNow()}" required>`)}${field('Počet samostatných porcí',`<input name="count" type="number" min="1" max="30" value="1" required>`)}</div>${selections(s)}<p class="small muted">Zamrazení neobnovuje čerstvost starého jídla. Zapisuj správně zchlazené a oddělené porce.</p><button class="btn">Přidat porce</button></form></details>`);
-    const f=document.querySelector('#p-form');wireRecipe(f);f.onsubmit=run(()=>{const state=read(),d=new FormData(f),ids=chosen(f),prepared=d.get('prepared'),frozen=d.get('frozen');if(!ids.length)throw Error('Vyber složení.');if(!d.get('title').trim())throw Error('Doplň název jídla.');if(new Date(frozen)>new Date()||new Date(prepared)>new Date(frozen))throw Error('Zkontroluj pořadí a čas přípravy a zmrazení.');if(new Date(frozen).getTime()>=expiry({preparedAt:prepared},ids))throw Error('V době zmrazení už uplynul limit pro tuto várku. Takovou porci neplánuj k podání.');for(let i=0;i<Number(d.get('count'));i++)state.stock.push({id:uid(),title:d.get('title').trim(),foods:ids.slice(),preparedAt:prepared,frozenAt:frozen,usedBy:''});write(state);render('freezer');});
+    const s=read();frame('freezer',`<p class="small muted">Každá položka je jedna samostatná porce. V plánu ji vybereš přes „Jedna porce z mrazáku“.</p>${s.stock.filter(x=>!x.usedBy).map(x=>`<section class="p-panel"><h2>${e(x.title)}</h2><p>Připraveno ${showDate(x.preparedAt)}, zamrazeno ${showDate(x.frozenAt)}</p><p class="muted">${s.plans.some(p=>p.stockId===x.id)?'Rezervováno v plánu':'Volná porce'}</p>${x.servingNote?`<p class="small muted">${e(x.servingNote)}</p>`:''}</section>`).join('')||'<p>Mrazák zatím nemá žádné zapsané porce.</p>'}<details class="p-panel"><summary>Přidat porce do mrazáku</summary><form id="p-form"><div class="p-form-grid">${field('Recept',`<select name="recipe">${options()}</select>`)}${field('Název',text('title','',true))}${field('Skutečný čas přípravy',`<input name="prepared" type="datetime-local" required>`)}${field('Skutečný čas zamrazení',`<input name="frozen" type="datetime-local" value="${dtNow()}" required>`)}${field('Počet samostatných porcí',`<input name="count" type="number" min="1" max="30" value="1" required>`)}</div><div data-recipe-info></div>${selections(s)}<p class="small muted">Zamrazení neobnovuje čerstvost starého jídla. Zapisuj správně zchlazené a oddělené porce.</p><button class="btn">Přidat porce</button></form></details>`);
+    const f=document.querySelector('#p-form');wireRecipe(f);f.onsubmit=run(()=>{const state=read(),d=new FormData(f),ids=chosen(f),prepared=d.get('prepared'),frozen=d.get('frozen');if(!ids.length)throw Error('Vyber složení.');if(!d.get('title').trim())throw Error('Doplň název jídla.');if(new Date(frozen)>new Date()||new Date(prepared)>new Date(frozen))throw Error('Zkontroluj pořadí a čas přípravy a zmrazení.');if(new Date(frozen).getTime()>=expiry({preparedAt:prepared},ids))throw Error('V době zmrazení už uplynul limit pro tuto várku. Takovou porci neplánuj k podání.');for(let i=0;i<Number(d.get('count'));i++)state.stock.push({id:uid(),title:d.get('title').trim(),foods:ids.slice(),preparedAt:prepared,frozenAt:frozen,usedBy:'',recipeId:d.get('recipe')||'',servingNote:recipes.find(r=>r.id===d.get('recipe'))?.servingNote||''});write(state);render('freezer');});
   }
   function download(data,name,type='application/json') {const url=URL.createObjectURL(new Blob([data],{type})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
   function merge(a,b) {
@@ -224,6 +241,6 @@ const PrikrmyApp = (() => {
     document.querySelector('#p-export').onclick=run(()=>download(problem?(localStorage.getItem(KEY)||''):JSON.stringify(read(),null,2),'molcuchyne-prikrmy-'+today()+'.json'));
     document.querySelector('#p-import').onchange=async ev=>{const file=ev.target.files[0];if(!file)return;try{if(file.size>10*1024*1024)throw Error('Záloha je příliš velká.');const imported=validate(JSON.parse(await file.text()));const merged=merge(read(),imported);write(merged);render('backup');document.querySelector('#p-import-status').textContent='Záloha načtená. Záznamy zůstaly zachované.';}catch(err){document.querySelector('#p-import-status').textContent='Import se neprovedl: '+err.message;}};
   }
-  function render(tab='plan') {read();({plan:planView,foods:foodView,diary:diaryView,recipes:recipesView,freezer:freezerView,backup:backupView}[tab]||planView)();}
-  return {render,dayCard,bindDayButtons,shopping,core:{empty,validate,merge,next,expiry,actual,tried,newFoods,read,write,recipes,catalog,localDate:iso,batchWarning}};
+  function render(tab='plan',id='') {read();if(tab==='recipe')return recipeView(id);({plan:planView,foods:foodView,diary:diaryView,recipes:recipesView,guide:guideView,freezer:freezerView,backup:backupView}[tab]||planView)();}
+  return {render,dayCard,bindDayButtons,shopping,core:{empty,validate,merge,next,expiry,actual,tried,newFoods,read,write,recipes,catalog,localDate:iso,batchWarning,ageMatches}};
 })();

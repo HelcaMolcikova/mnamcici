@@ -21,3 +21,13 @@
 .p-form-grid{display:grid;gap:0 18px}.p-week{display:grid;gap:0 14px}
 @media(min-width:650px){.p-form-grid,.p-week{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(min-width:900px){.tyden .hlavicka,.tyden .den{grid-template-columns:155px repeat(4,minmax(0,1fr))}.p-day .kdy{display:none}.tyden{overflow-wrap:anywhere}}
+.p-recipe-type{font-size:12px;font-weight:650;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:0 0 5px}
+.p-recipe h2 a{text-decoration:none}.p-recipe h2 a:hover{color:var(--accent)}
+.p-card-actions{display:flex;flex-direction:column;align-items:flex-start;gap:12px;margin-top:18px}
+.p-recipe .p-warning{padding:8px;font-size:13px}.p-recipe .p-tag{margin:10px 0 4px}
+.p-toolbar>.p-field{flex:1;min-width:220px}.p-toolbar>.p-field input,.p-toolbar>.p-field select{width:100%;min-width:0}
+.p-known{display:flex;align-items:center;gap:10px;min-height:44px;font-size:14px}.p-known input{accent-color:var(--accent);width:18px;height:18px;flex:none}
+.p-detail>h2{font-size:25px;margin:10px 0}.p-detail .dva{margin:24px 0}.p-detail h3{font-size:17px;margin:0 0 12px}
+.p-guide{display:grid;gap:0 14px}.p-guide-title{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.p-guide-title h2{margin:0}.p-step{width:36px;height:36px;border-radius:50%;background:var(--note);color:var(--note-ink);display:grid;place-items:center;font-weight:700;flex:none}
+@media(min-width:800px){.p-guide{grid-template-columns:repeat(2,minmax(0,1fr))}}
