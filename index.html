@@ -281,16 +281,18 @@ const TYDEN = {
       prikrmNavrh: 'Zelenina s vařenou hruškou nebo jablkem. Konkrétní kombinaci ještě vybereme.',
       jidla: [
         { kdy: 'Oběd', co: 'Zapečené maso s bramborami', od: 'od maminky' },
-        { kdy: 'Večeře', recept: 'sunkofleky', pozn: 'už upečené' },
+        { kdy: 'Večeře', co: 'Zbytek zapečeného masa', od: 'od maminky' },
+        { kdy: 'Večeře', co: 'Domácí chlebík', od: 'od ségry' },
       ] },
     { jidla: [
         { kdy: 'Snídaně', co: 'Dýňovo-jablečný koláč z vloček', pozn: 'pro Helču, už upečený' },
         { kdy: 'Oběd', recept: 'sunkofleky', pozn: 'z neděle' },
-        { kdy: 'Večeře', recept: 'sardinkova', chystas: 2, pozn: 'za 10 minut, s chlebem a zeleninou' },
+        { kdy: 'Večeře', recept: 'sardinkova', chystas: 2, bez: ['chleb'], pozn: 's chlebíkem od ségry a zeleninou' },
       ] },
     { vari: [['rajska', null], ['oats', 2]],
       jidla: [
         { kdy: 'Snídaně', co: 'Dýňovo-jablečný koláč z vloček', pozn: 'pro Helču, už upečený' },
+        { kdy: 'Oběd', recept: 'sunkofleky', pozn: 'zbytek z neděle' },
         { kdy: 'Večeře', recept: 'rajska' },
       ] },
     { jidla: [
@@ -406,11 +408,12 @@ function nakupOznam(text) {const n=document.querySelector('#nakup-status');if(n)
 
 function seznam() {
   const pol = {};
-  const k_vareni = d => [...(d.vari || []), ...d.jidla.filter(j => j.chystas).map(j => [j.recept, j.chystas])];
-  for (const d of dnyTydne()) for (const [id, porce] of k_vareni(d)) {
+  const k_vareni = d => [...(d.vari || []), ...d.jidla.filter(j => j.chystas).map(j => [j.recept, j.chystas, j.bez])];
+  for (const d of dnyTydne()) for (const [id, porce, bez = []] of k_vareni(d)) {
     const r = RECEPTY[id];
     const krat = porce && r.porce ? porce / r.porce : 1;
     for (const [k, m] of r.suroviny) {
+      if (bez.includes(k)) continue;
       const p = pol[k] || (pol[k] = { k, ...SUROVINY[k], m: 0, bezMnozstvi: false, pro: new Set() });
       if (m == null) p.bezMnozstvi = true; else p.m += m * krat;
       p.pro.add(r.kratce);
