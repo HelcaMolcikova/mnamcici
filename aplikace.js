@@ -36,15 +36,18 @@ vykresliTyden = function() {
   $('#obsah').innerHTML=h+'</div></section></div>';
   PrikrmyApp.bindDayButtons($('#obsah'));
 };
-function vykresliDen(id) {
-  const d=nactiDatum(id); if(!d)return vykresliTyden();
+function vykresliDnes() {vykresliDen(PrikrmyApp.core.localDate(new Date()),true);}
+function vykresliDen(id,allowOutside=false) {
+  let d=nactiDatum(id);
+  if(!d&&allowOutside&&/^\d{4}-\d{2}-\d{2}$/.test(id))d={dt:new Date(id+'T12:00:00'),i:-1,id,jidla:[]};
+  if(!d)return vykresliTyden();
   const dates=DATUMY(), dny=dnyTydne();
   const jidlo=d.jidla.find(j=>j.kdy==='Večeře'&&(RECEPTY[j.recept]?.foto||RECEPTY[j.recept]?.fotoNahled)) || d.jidla.find(j=>(RECEPTY[j.recept]?.foto||RECEPTY[j.recept]?.fotoNahled)) || d.jidla.find(j=>j.recept) || d.jidla[0];
   const r=jidlo?.recept&&RECEPTY[jidlo.recept];
   const foto=r&&(r.foto||r.fotoNahled);
   let h=`<article class="daily"><a class="back-link" href="#tyden">Zpět na celý týden</a><div class="day-top"><p class="eyebrow">${datum(d.dt)} ${d.dt.getFullYear()} · Helča a Honza</p><h1>${DNY[d.dt.getDay()]} u nás doma</h1></div><nav class="day-rail" aria-label="Dny týdne">${dny.map((x,i)=>`<a href="#den/${dates[i]}" ${i===d.i?'aria-current="date"':''}><span>${DNY[x.dt.getDay()].slice(0,2)}</span><b>${x.dt.getDate()}</b></a>`).join('')}</nav>`;
   if(jidlo)h+=`<div class="hero${foto?'':' no-photo'}">${foto?`<img src="${esc(foto)}" alt="${esc(JMENO_JIDLA(jidlo))}">`:''}<div class="hero-text"><span class="tag">${esc(jidlo.kdy)}</span><h2>${esc(JMENO_JIDLA(jidlo))}</h2>${jidlo.od||jidlo.pozn?`<p>${esc(jidlo.od||jidlo.pozn)}</p>`:''}${r?`<a class="btn" href="#recept/${jidlo.recept}">Otevřít recept</a>`:''}</div></div>`;
-  else h+='<div class="hero no-photo"><div class="hero-text"><h2>Dnes je zatím volno</h2><p>V rodinném plánu na tento den není žádné jídlo.</p><a class="btn line" href="#recepty">Prohlédnout kuchařku</a></div></div>';
+  else h+='<div class="hero no-photo"><div class="hero-text"><h2>Na tento den zatím není jídlo</h2><p>V uloženém rodinném plánu na tento den není žádné jídlo.</p><a class="btn line" href="#recepty">Prohlédnout kuchařku</a></div></div>';
   h+=`<div class="day-bottom"><section><div class="day-meals">${['Snídaně','Oběd','Večeře'].map(k=>{const js=d.jidla.filter(j=>j.kdy===k);return `<div class="day-meal"><span class="label">${k}</span><div>${js.length?js.map(j=>`${j.recept?`<a href="#recept/${j.recept}">${esc(JMENO_JIDLA(j))}</a>`:esc(JMENO_JIDLA(j))}${j.od||j.pozn?`<p>${esc(j.od||j.pozn)}</p>`:''}`).join(''):'<span class="muted">Neplánováno</span>'}</div></div>`}).join('')}</div></section><aside><section class="day-prep"><h2>${priprava(d).length?'Dnes chystáš':'Příprava'}</h2>${priprava(d).length?`<ul>${priprava(d).map(([rid,p])=>`<li><a href="#recept/${rid}${p?'/'+p:''}">${esc(RECEPTY[rid].kratce)}</a>${p?' · '+pocetPorci(p):''}</li>`).join('')}</ul>`:'<p class="muted">Na dnešek není naplánované další vaření.</p>'}</section><section class="day-baby p-panel"><h2>Pro Aničku</h2>${navrhPrikrmu(d)}${PrikrmyApp.dayCard(id)}</section></aside></div></article>`;
   $('#obsah').innerHTML=h;PrikrmyApp.bindDayButtons($('#obsah'));
 }
@@ -90,10 +93,24 @@ document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#recept
 const puvodniNakup=vykresliNakup;
 vykresliNakup=function(){
   puvodniNakup();
+  const editor=document.createElement('details');editor.className='p-panel own-shopping-editor';editor.id='own-shopping-editor';
+  editor.innerHTML=`<summary>Přidat vlastní položku</summary><form id="own-shopping-form"><input type="hidden" name="itemId"><div class="p-form-grid"><label class="p-field">Název<input name="name" required maxlength="200" placeholder="Například pečivo"></label><label class="p-field">Množství (volitelné)<input name="amount" maxlength="80" placeholder="Například 2 ks"></label></div><button type="submit" class="btn" ${nakupProblem?'disabled':''}>Uložit položku</button></form>`;
+  $('#obsah .akce').after(editor);
+  const form=editor.querySelector('form');
+  form.onsubmit=ev=>{ev.preventDefault();try{
+    const name=form.elements.name.value.trim(),amount=form.elements.amount.value.trim(),id=form.elements.itemId.value;
+    if(!name)throw Error('Napiš název položky.');
+    const items=nactiVlastniNakup();if(nakupProblem)throw Error(nakupProblem);
+    if(id){const item=items.find(x=>x.id===id);if(!item)throw Error('Položka nebyla nalezená.');if(item.name!==name||item.amount!==amount)item.checked=false;item.name=name;item.amount=amount;}
+    else {if(items.length>=1000)throw Error('Seznam už obsahuje příliš mnoho vlastních položek.');items.push({id:'vlastni-'+crypto.randomUUID(),name,amount,checked:false});}
+    ulozVlastniNakup(items);vykresliNakup();nakupOznam(id?'Položka upravená.':'Položka přidaná.');document.querySelector('#nakup-status').scrollIntoView({block:'center'});
+  }catch(err){nakupOznam(err.message);}};
+  $('#obsah').querySelectorAll('[data-edit-item]').forEach(b=>b.onclick=()=>{const item=nactiVlastniNakup().find(x=>x.id===b.dataset.editItem);if(!item)return;editor.open=true;form.elements.itemId.value=item.id;form.elements.name.value=item.name;form.elements.amount.value=item.amount;editor.querySelector('summary').textContent='Upravit vlastní položku';form.elements.name.focus();});
+
   const note=document.createElement('p');note.className='storage-note';note.textContent='Odškrtnutí se ukládá v tomto prohlížeči. Na druhém telefonu se samo nezmění.';$('#obsah .akce').after(note);
   const navrhy=dnyTydne().filter(d=>d.prikrmNavrh&&!PrikrmyApp.core.read().plans.some(p=>p.date===PrikrmyApp.core.localDate(d.dt)));
   if(navrhy.length){const pending=document.createElement('p');pending.className='recipe-alert';pending.textContent='K příkrmu ještě vyber konkrétní zeleninu a hrušku nebo jablko. Tyto nerozhodnuté suroviny zatím nejsou přičtené do nákupu.';note.after(pending)}
   const b=document.createElement('button');b.className='btn line';b.type='button';b.textContent='Zobrazit seznam k předání';$('#obsah .akce').append(b);
-  b.addEventListener('click',()=>{const hot=store.get(KLIC_NAKUP,[]);const text=seznam().filter(p=>p.o!=='Doma'&&!hot.includes(p.k)).map(p=>'- '+p.n+(mnozstvi(p)?' '+mnozstvi(p):'')).join('\n');let box=$('#seznam-k-predani');if(!box){box=document.createElement('div');box.id='seznam-k-predani';$('#obsah .akce').after(box)}box.innerHTML='<label class="p-field">Nákupní seznam<textarea class="copy-area" readonly></textarea></label><p class="storage-note">Seznam můžeš předat nákupnímu asistentovi. Do košíku na Rohlíku se tím sám nevloží.</p>';const area=box.querySelector('textarea');area.value=text;area.focus();area.select()});
+  b.addEventListener('click',()=>{const hot=store.get(KLIC_NAKUP,[]);const text=seznam().filter(p=>p.o!=='Doma'&&!jeHotovo(p,hot)).map(p=>'- '+p.n+(mnozstvi(p)?' '+mnozstvi(p):'')).join('\n');let box=$('#seznam-k-predani');if(!box){box=document.createElement('div');box.id='seznam-k-predani';$('#obsah .akce').after(box)}box.innerHTML='<label class="p-field">Nákupní seznam<textarea class="copy-area" readonly></textarea></label><p class="storage-note">Seznam můžeš předat nákupnímu asistentovi. Do košíku na Rohlíku se tím sám nevloží.</p>';const area=box.querySelector('textarea');area.value=text;area.focus();area.select()});
 };
 route();

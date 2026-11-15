@@ -143,12 +143,13 @@ a.karta:hover .nm{color:var(--accent)}
 .porce button:hover{box-shadow:inset 0 0 0 1.5px var(--accent)}
 .recept a{text-decoration-color:var(--line2);text-underline-offset:3px}
 </style>
-<link rel="stylesheet" href="prikrmy.css?v=a7e2133428">
-<link rel="stylesheet" href="vzhled.css?v=f479ac4dc0">
+<link rel="stylesheet" href="prikrmy.css?v=128187ac20">
+<link rel="stylesheet" href="vzhled.css?v=43df25bda3">
 </head>
 <body>
 <header class="head">
   <a class="brand" href="#tyden">Mňamčíci</a>
+  <a class="today-shortcut" href="#dnes">Dnes</a>
   <nav class="menu" aria-label="Menu">
     <a href="#tyden" data-r="tyden">Týden</a>
     <a href="#nakup" data-r="nakup">Nákup</a>
@@ -167,8 +168,7 @@ a.karta:hover .nm{color:var(--accent)}
 </nav>
 
 <script src="prikrmy-recepty.js?v=8633d31599"></script>
-<script src="prikrmy-recepty.js?v=8633d31599"></script>
-<script src="prikrmy.js?v=bb1c98d81e"></script>
+<script src="prikrmy.js?v=b958366a26"></script>
 <script>
 /* ===== Recepty =====
    Suroviny: [klíč, množství na celý recept (číslo nebo null), poznámka].
@@ -383,6 +383,25 @@ function vykresliTyden() {
 }
 
 /* ===== Nákup ===== */
+const KLIC_VLASTNI_NAKUP = 'molcuchyne-vlastni-nakup-' + TYDEN.od;
+let nakupProblem = '';
+function nactiVlastniNakup() {
+  try {
+    const raw=localStorage.getItem(KLIC_VLASTNI_NAKUP),items=raw?JSON.parse(raw):[];
+    if(!Array.isArray(items)||items.length>1000||!items.every(x=>x&&typeof x.id==='string'&&/^vlastni-[a-zA-Z0-9-]+$/.test(x.id)&&typeof x.name==='string'&&x.name.trim()&&x.name.length<=200&&typeof x.amount==='string'&&x.amount.length<=80&&typeof x.checked==='boolean')||new Set(items.map(x=>x.id)).size!==items.length)throw Error('Neplatné vlastní položky');
+    nakupProblem='';return items;
+  }catch{nakupProblem='Vlastní položky se nepodařilo načíst. Původní data zůstala zachovaná.';return [];}
+}
+function ulozVlastniNakup(items) {
+  nactiVlastniNakup();if(nakupProblem)throw Error(nakupProblem);
+  try{localStorage.setItem(KLIC_VLASTNI_NAKUP,JSON.stringify(items));}catch{throw Error('Položka se neuložila. Prohlížeč nepovolil zápis nebo je plný.');}
+}
+function vlastniPolozky() {
+  return nactiVlastniNakup().map(x=>({k:x.id,n:x.name,mnozstviText:x.amount,m:0,j:'',o:'Vlastní položky',pro:new Set(['Přidáno ručně']),vlastni:true,hotovo:x.checked}));
+}
+function jeHotovo(p,hotovo) {return p.vlastni?p.hotovo:hotovo.includes(p.k);}
+function nakupOznam(text) {const n=document.querySelector('#nakup-status');if(n)n.textContent=text;}
+
 function seznam() {
   const pol = {};
   const k_vareni = d => [...(d.vari || []), ...d.jidla.filter(j => j.chystas).map(j => [j.recept, j.chystas])];
@@ -402,33 +421,35 @@ function seznam() {
     p.bezMnozstvi = true;
     p.pro.add('Anička: ' + item.title);
   }
-  return Object.values(pol);
+  return [...Object.values(pol),...vlastniPolozky()];
 }
 const KLIC_NAKUP = 'molcuchyne-nakup-' + TYDEN.od;
 function mnozstvi(p) {
+  if(p.vlastni)return p.mnozstviText;
   if (!p.m) return '';
   return cislo(p.m) + (p.j ? ' ' + p.j : '') + (p.bezMnozstvi ? ' a víc' : '');
 }
 function polozka(p, hotovo) {
-  const ok = hotovo.includes(p.k);
-  return `<label class="pol${ok ? ' ok' : ''}"><input type="checkbox" data-k="${p.k}"${ok ? ' checked' : ''}>
+  const ok = jeHotovo(p,hotovo);
+  return `<label class="pol${ok ? ' ok' : ''}"><input type="checkbox" data-k="${p.k}"${p.vlastni?' data-vlastni="1"':''}${ok ? ' checked' : ''}>
     <span class="nm">${esc(p.n)}<span class="pro">${esc([...p.pro].join(', '))}</span></span><span class="mn">${esc(mnozstvi(p))}</span></label>`;
 }
 function vykresliNakup() {
   const hotovo = store.get(KLIC_NAKUP, []);
   const vse = seznam();
-  const oddeleni = ['Lednice', 'Ovoce a zelenina', 'Pečivo', 'Trvanlivé'];
+  const oddeleni = ['Lednice', 'Ovoce a zelenina', 'Pečivo', 'Trvanlivé', 'Vlastní položky'];
   let h = `<div class="top"><h1>Nákup</h1></div>
-    <div class="akce"><button class="btn" id="kopirovat" type="button">Zkopírovat seznam</button></div><div class="nakup">`;
+    <div class="akce"><button class="btn" id="kopirovat" type="button">Zkopírovat seznam</button></div><p id="nakup-status" role="status" class="small muted">${esc(nakupProblem)}</p><div class="nakup">`;
   for (const o of oddeleni) {
     const v = vse.filter(p => p.o === o);
-    if (v.length) h += `<div class="skupina"><h3>${o}</h3>${v.map(p => polozka(p, hotovo)).join('')}</div>`;
+    if (v.length) h += `<div class="skupina"><h3>${o}</h3>${v.map(p => p.vlastni?`<div class="own-shopping-row">${polozka(p,hotovo)}<button type="button" class="text-link" data-edit-item="${p.k}">Upravit</button></div>`:polozka(p,hotovo)).join('')}</div>`;
   }
   h += `</div>`;
   const doma = vse.filter(p => p.o === 'Doma');
   if (doma.length) h += `<details class="spiz"><summary>Doma nejspíš máš (${doma.length})</summary><div class="skupina">${doma.map(p => polozka(p, hotovo)).join('')}</div></details>`;
   $('#obsah').innerHTML = h;
   $('#obsah').querySelectorAll('input[data-k]').forEach(i => i.addEventListener('change', () => {
+    if(i.dataset.vlastni){try{const items=nactiVlastniNakup(),item=items.find(x=>x.id===i.dataset.k);if(!item)throw Error('Položka nebyla nalezená.');item.checked=i.checked;ulozVlastniNakup(items);i.closest('.pol').classList.toggle('ok',i.checked);}catch(err){i.checked=!i.checked;nakupOznam(err.message);}return;}
     const s = new Set(store.get(KLIC_NAKUP, []));
     i.checked ? s.add(i.dataset.k) : s.delete(i.dataset.k);
     store.set(KLIC_NAKUP, [...s]);
@@ -436,7 +457,7 @@ function vykresliNakup() {
   }));
   $('#kopirovat').addEventListener('click', async e => {
     const hot = store.get(KLIC_NAKUP, []);
-    const text = vse.filter(p => p.o !== 'Doma' && !hot.includes(p.k)).map(p => '- ' + p.n + (mnozstvi(p) ? ' ' + mnozstvi(p) : '')).join('\n');
+    const text = seznam().filter(p => p.o !== 'Doma' && !jeHotovo(p,hot)).map(p => '- ' + p.n + (mnozstvi(p) ? ' ' + mnozstvi(p) : '')).join('\n');
     try { await navigator.clipboard.writeText(text); e.target.textContent = 'Zkopírováno'; }
     catch (err) { e.target.textContent = 'Kopírování nejde'; }
     setTimeout(() => e.target.textContent = 'Zkopírovat seznam', 2000);
@@ -481,11 +502,12 @@ function vykresliPrikrmy(tab,id) { PrikrmyApp.render(tab,id); }
 /* ===== Navigace a režim ===== */
 function route() {
   const [r, id, porce] = (location.hash.slice(1) || 'tyden').split('/');
-  const sekce = r === 'recept' ? 'recepty' : r === 'den' ? 'tyden' : r;
+  const sekce = r === 'recept' ? 'recepty' : (r === 'den'||r === 'dnes') ? 'tyden' : r;
   document.querySelectorAll('[data-r]').forEach(a => a.classList.toggle('on', a.dataset.r === sekce));
   if (r === 'nakup') vykresliNakup();
   else if (r === 'recepty') vykresliRecepty();
   else if (r === 'den') vykresliDen(id);
+  else if (r === 'dnes') vykresliDnes();
   else if (r === 'prikrmy') vykresliPrikrmy(id,porce);
   else if (r === 'recept') vykresliRecept(id, porce ? +porce : null);
   else vykresliTyden();
@@ -509,7 +531,7 @@ document.querySelectorAll('.menu a, .dole a, .brand').forEach(a => a.addEventLis
 addEventListener('hashchange', route);
 </script>
 <script src="kucharka.js?v=f481183b6d"></script>
-<script src="aplikace.js?v=0f2c0c94a0"></script>
+<script src="aplikace.js?v=9dfecab0b6"></script>
 <style>@media(min-width:800px){.rezim.mobil{display:none}}</style>
 </body>
 </html>
