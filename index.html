@@ -270,30 +270,31 @@ const RECEPTY = {
 /* ===== Týden =====
    Plán je společný pro všechny, kdo otevřou odkaz. Mění ho agent v tomto souboru.
    vari: co se ten den uvaří (recept a počet porcí, ze kterých se počítá nákup).
+   uvareno: už hotová jídla bez dalšího nákupu.
    jidla: co se jí; recept = odkaz na recept, od = kdo jídlo přinesl, pozn = drobnost navíc,
    chystas = rychlé jídlo připravené ten den (počet porcí jde do nákupu). */
 const TYDEN = {
   od: '2026-11-15',
   dny: [
-    { vari: [['rajska', null], ['oats', 2]],
+    { uvareno: [{recept:'sunkofleky'}, {co:'Dýňovo-jablečný koláč z vloček'}],
       prikrmNavrh: 'Zelenina s vařenou hruškou nebo jablkem. Konkrétní kombinaci ještě vybereme.',
       jidla: [
         { kdy: 'Oběd', co: 'Zapečené maso s bramborami', od: 'od maminky' },
+        { kdy: 'Večeře', recept: 'sunkofleky', pozn: 'už upečené' },
+      ] },
+    { jidla: [
+        { kdy: 'Snídaně', co: 'Dýňovo-jablečný koláč z vloček', pozn: 'pro Helču, už upečený' },
+        { kdy: 'Oběd', recept: 'sunkofleky', pozn: 'z neděle' },
+        { kdy: 'Večeře', recept: 'sardinkova', chystas: 2, pozn: 'za 10 minut, s chlebem a zeleninou' },
+      ] },
+    { vari: [['rajska', null], ['oats', 2]],
+      jidla: [
+        { kdy: 'Snídaně', co: 'Dýňovo-jablečný koláč z vloček', pozn: 'pro Helču, už upečený' },
         { kdy: 'Večeře', recept: 'rajska' },
       ] },
     { jidla: [
         { kdy: 'Snídaně', recept: 'oats', pozn: 'pro Helču' },
-        { kdy: 'Oběd', recept: 'rajska', pozn: 'z neděle' },
-        { kdy: 'Večeře', recept: 'sardinkova', chystas: 2, pozn: 'za 10 minut, s chlebem a zeleninou' },
-      ] },
-    { vari: [['sunkofleky', 4], ['oats', 2]],
-      jidla: [
-        { kdy: 'Snídaně', recept: 'oats', pozn: 'pro Helču' },
-        { kdy: 'Večeře', recept: 'sunkofleky' },
-      ] },
-    { jidla: [
-        { kdy: 'Snídaně', recept: 'oats', pozn: 'pro Helču' },
-        { kdy: 'Oběd', recept: 'sunkofleky', pozn: 'z úterý' },
+        { kdy: 'Oběd', recept: 'rajska', pozn: 'z úterý' },
       ] },
     { jidla: [{ kdy: 'Snídaně', recept: 'oats', pozn: 'pro Helču' }] },
     { jidla: [] },
@@ -531,7 +532,7 @@ document.querySelectorAll('.menu a, .dole a, .brand').forEach(a => a.addEventLis
 addEventListener('hashchange', route);
 </script>
 <script src="kucharka.js?v=f481183b6d"></script>
-<script src="aplikace.js?v=9dfecab0b6"></script>
+<script src="aplikace.js?v=7758b98628"></script>
 <style>@media(min-width:800px){.rezim.mobil{display:none}}</style>
 </body>
 </html>
