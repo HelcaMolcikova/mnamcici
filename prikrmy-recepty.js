@@ -35,6 +35,7 @@ globalThis.PRIKRMY_KNIHOVNA = (() => {
       id:'polevka-krupicka-ryze-vejce',name:'Polévka s krupičkou, rýží a vejcem',category:'Polévka',minMonths:6,
       ageSource:'Autorka uvádí přibližně od 6 měsíců podle připravenosti.',
       sourceUrl:'https://www.instagram.com/p/DfXVvOys8CU/',
+      photo:'fotky/prikrmy-instagram/polevka-krupicka-ryze-vejce.jpg',
       foods:['mrkev','petrzelkoren','celer','cesnek','krupicka','ryze','maslo','vejce','petrzel'],
       ingredients:['2 mrkve','1 kořen petržele','100 g celeru','1 stroužek česneku','2 lžíce krupičky','2 lžíce rýže','kousek másla','1 l vody','1 vejce','petrželová nať'],
       steps:['Kořenovou zeleninu jemně pokrájej nebo nastrouhej. Krátce ji prohřej na másle s česnekem a krupičkou.','Přidej vodu a propláchnutou rýži. Vař, až budou obě složky zcela měkké.','Za míchání přilij rozšlehané vejce a důkladně provař. Nakonec přidej jemnou petrželku.'],
@@ -44,6 +45,7 @@ globalThis.PRIKRMY_KNIHOVNA = (() => {
       id:'cizrna-spenat-vejce',name:'Cizrna se špenátem, bramborem a vejcem',category:'Pyré',minMonths:6,
       ageSource:'Ve zdroji „od 7. měsíce“, tedy po ukončeném 6. měsíci. Nejde o údaj „od ukončeného 7. měsíce“.',
       sourceUrl:'https://www.instagram.com/reel/De8sJLnMcFV/',
+      photo:'fotky/prikrmy-instagram/cizrna-spenat-vejce.jpg',
       foods:['cizrna','spenat','brambor','vejce','maslo','formula'],
       ingredients:['2 špalíčky mraženého špenátu','100 g brambor','2 lžíce předvařené propláchnuté cizrny','1 vejce','kousek másla','voda na vaření','hotové kojenecké mléko - autorka používá množství ze 3 odměrek, vždy s vodou dle obalu'],
       steps:['Brambory, špenát a cizrnu uvař ve vodě do úplného změknutí.','Vmíchej vejce a pokračuj ve vaření, dokud nezůstane syrový bílek ani žloutek. Přidej máslo a uprav konzistenci.','Mléko připrav samostatně přesně podle návodu a vmíchej až do jedné porce určené k podání.'],
@@ -54,6 +56,7 @@ globalThis.PRIKRMY_KNIHOVNA = (() => {
       id:'kure-cocka-kuskus',name:'Kuřecí s čočkou, kuskusem a zeleninou',category:'Hlavní jídlo',minMonths:6,
       ageSource:'Ve zdroji „od 7. měsíce“, přepočteno na ukončených 6 měsíců.',
       sourceUrl:'https://www.instagram.com/reel/DesC-iWsDBx/',
+      photo:'fotky/prikrmy-instagram/kure-cocka-kuskus.jpg',
       foods:['kure','cuketa','cocka','kuskus','mrkev','olej'],
       ingredients:['70 g kuřecího masa','30 g cukety','2 lžíce červené čočky','2 lžíce kuskusu','hrst baby mrkve','1 l vody ve zdrojovém receptu - skutečné množství přizpůsob konzistenci','1 lžička olivového oleje'],
       steps:['Nakrájené maso, zeleninu, propláchnutou čočku a kuskus vlož do hrnce s vodou.','Pod pokličkou vař přibližně 30 minut; maso musí být úplně hotové a zelenina s čočkou měkké.','Před mixováním podle potřeby odlož část tekutiny. Rozmixuj, vmíchej olej a uprav hustotu.'],
@@ -63,6 +66,7 @@ globalThis.PRIKRMY_KNIHOVNA = (() => {
       id:'ovesna-kase-zloutek',name:'Ovesná kaše s ovocem a žloutkem',category:'Kaše',minMonths:7,
       ageSource:'Autorka výslovně uvádí od ukončeného 7. měsíce.',
       sourceUrl:'https://www.instagram.com/reel/De07J7xM23m/',
+      photo:'fotky/prikrmy-instagram/ovesna-kase-zloutek.jpg',
       foods:['vlocky','mleko','maliny','banan','skorice','vejce'],
       ingredients:['¼ hrnku ovesných vloček','1 hrnek mléka','hrstička malin','½ banánu','špetka skořice','1 žloutek','volitelně lžíce bílého jogurtu až při podávání'],
       steps:['Vločky dej do hrnce s mlékem, malinami, rozmačkaným banánem, skořicí a žloutkem.','Míchej a vař do změknutí vloček a úplného provaření žloutku.','Nech zchladnout. Volitelný jogurt přidej až do podávané porce.'],
@@ -73,6 +77,7 @@ globalThis.PRIKRMY_KNIHOVNA = (() => {
       id:'zeleninova-polevka-cizrna',name:'Zeleninová polévka s cizrnou',category:'Polévka',minMonths:8,
       ageSource:'Autorka uvádí přibližně 8-9 měsíců podle zvládání konzistence. Filtr používá dolní hranici 8.',
       sourceUrl:'https://www.instagram.com/reel/DekRuZfs-rT/',
+      photo:'fotky/prikrmy-instagram/zeleninova-polevka-cizrna.jpg',
       foods:['mrkev','petrzelkoren','celer','brambor','cizrna','kapusta','cibule','cesnek','maslo','mouka-spaldova','kmin','majoranka'],
       ingredients:['130 g mrkve','45 g kořenové petržele','100 g celeru','300 g brambor','130 g předvařené cizrny','kapusta a cibule - množství neuvedeno','3 stroužky česneku','20 g másla','20 g hladké špaldové mouky','1,5 l vody','drcený kmín a majoránka'],
       steps:['Kořenovou zeleninu pokrájej a krátce prohřej na másle. Přidej ostatní zeleninu, propláchnutou cizrnu, kmín a vodu.','Vař doměkka. Přilij mouku rozmíchanou ve studené vodě a ještě nejméně 10 minut provař.','Dochuť majoránkou. Cizrnu rozmáčkni a podle potřeby část polévky rozmixuj.'],
@@ -82,6 +87,7 @@ globalThis.PRIKRMY_KNIHOVNA = (() => {
       id:'bulgur-zelenina-kure',name:'Bulgur se zeleninou a kuřecím',category:'Hlavní jídlo',minMonths:8,
       ageSource:'Autorka uvádí přibližně 8-9 měsíců podle dovedností. Filtr používá dolní hranici 8.',
       sourceUrl:'https://www.instagram.com/reel/DePnlvBsEXs/',
+      photo:'fotky/prikrmy-instagram/bulgur-zelenina-kure.jpg',
       foods:['kure','cibule','cesnek','paprika','mrkev','rajcata','bulgur','bazalka','majoranka','olej'],
       ingredients:['1 kuřecí prso','1 cibule','2 stroužky česneku','1 zelená paprika','1 větší mrkev','1 plechovka sekaných rajčat','½ hrnku bulguru','bazalka a majoránka','olej a voda podle potřeby'],
       steps:['Na oleji krátce prohřej drobně nakrájenou cibuli s česnekem a přidej malé kousky masa s bylinkami.','Přidej zeleninu a rajčata, podlij a dus, až bude maso důkladně hotové a zelenina měkká.','Bulgur uvař zvlášť podle obalu a promíchej se směsí. Přizpůsob velikost kousků.'],
@@ -91,12 +97,13 @@ globalThis.PRIKRMY_KNIHOVNA = (() => {
       id:'testoviny-cuketa-hrasek-kure',name:'Těstoviny s cuketou, hráškem a kuřecím',category:'Hlavní jídlo',minMonths:9,
       ageSource:'Autorka uvádí přibližně od 9 měsíců podle zvládání měkkých kousků.',
       sourceUrl:'https://www.instagram.com/reel/Ddza6qbMf0N/',
+      photo:'fotky/prikrmy-instagram/testoviny-cuketa-hrasek-kure.jpg',
       foods:['kure','cibule','cesnek','cuketa','hrasek','smetana','syr','muskat','testoviny'],
       ingredients:['1 kuřecí prso','1 menší šalotka','1-2 stroužky česneku','200 g mladé cukety','3 lžíce mraženého nebo propláchnutého sterilovaného hrášku','1 kelímek smetany','hrst strouhaného pasterovaného sýra','těstoviny - množství neuvedeno','špetka muškátového oříšku','trocha vody; případně bezsolné bylinky'],
       steps:['Drobnou šalotku a česnek krátce prohřej, přidej malé kousky masa a nech je zatáhnout.','Přidej cuketu, rozmáčknutý hrášek, smetanu a trochu vody. Dovař, aby bylo maso úplně hotové a zelenina měkká.','Vmíchej sýr s muškátem a spoj s uvařenými těstovinami.'],
       notes:['Hrášek nezůstává kulatý; maso i těstoviny uprav podle dovedností dítěte. Zkontroluj sůl v sýru a směsi koření.','Zvol pasterované mléčné výrobky. U těstovin ověř také případný obsah vajec.']
     }
-  ].map(r=>({...r,sourceLabel:'Vaříme mrňouskům - Kateřina Nádvorníková',ageUrl:r.sourceUrl}));
+  ].map(r=>({...r,photoCaption:'Náhled původního Reelu. Video otevřeš přes odkaz na zdroj.',sourceLabel:'Vaříme mrňouskům - Kateřina Nádvorníková',ageUrl:r.sourceUrl}));
   const guide=[
     {number:1,title:'Jeden druh zeleniny',foods:['brokolice','cuketa','mrkev','dyne','hokkaido','batat'],source:'Začátek jednodruhovou zeleninou.',practice:'Nabídni malé množství měkké zeleniny v konzistenci, kterou zvládá. Do deníku zapiš skutečnou ochutnávku.'},
     {number:2,title:'Kombinace zeleniny',foods:['brokolice','cuketa','mrkev','dyne','hokkaido','batat'],source:'Spojování již vyzkoušených druhů.',practice:'Kombinuj známé suroviny. Odmítnutí chuti eviduj zvlášť od zdravotního příznaku.'},
