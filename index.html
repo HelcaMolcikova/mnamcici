@@ -144,13 +144,13 @@ a.karta:hover .nm{color:var(--accent)}
 .recept a{text-decoration-color:var(--line2);text-underline-offset:3px}
 </style>
 <link rel="stylesheet" href="prikrmy.css?v=128187ac20">
-<link rel="stylesheet" href="vzhled.css?v=c2597999cf">
+<link rel="stylesheet" href="vzhled.css?v=45157e36a6">
 </head>
 <body>
 <header class="head">
-  <a class="brand" href="#tyden">Mňamčíci</a>
-  <a class="today-shortcut" href="#dnes">Dnes</a>
+  <a class="brand" href="#dnes">Mňamčíci</a>
   <nav class="menu" aria-label="Menu">
+    <a href="#dnes" data-r="dnes">Dnes</a>
     <a href="#tyden" data-r="tyden">Týden</a>
     <a href="#nakup" data-r="nakup">Nákup</a>
     <a href="#recepty" data-r="recepty">Recepty</a>
@@ -161,6 +161,7 @@ a.karta:hover .nm{color:var(--accent)}
 </header>
 <main class="wrap" id="obsah"></main>
 <nav class="dole" aria-label="Menu">
+  <a href="#dnes" data-r="dnes">Dnes</a>
   <a href="#tyden" data-r="tyden">Týden</a>
   <a href="#nakup" data-r="nakup">Nákup</a>
   <a href="#recepty" data-r="recepty">Recepty</a>
@@ -256,7 +257,7 @@ const RECEPTY = {
     poznamky: ['Vyšla vám na večeři pro dva s chlebíkem a se zeleninou. Klidně by snesla i víc paloučků.'],
   },
   oats: {
-    nazev: 'Overnight oats s jablkem a skořicí', kratce: 'Overnight oats', porce: 1, cas: '5 min', lednice: 'nachystat nejvýš na 2 dny dopředu',
+    nazev: 'Overnight oats s jablkem a skořicí', kratce: 'Overnight oats', foto: 'fotky/overnight-oats.jpg', porce: 1, cas: '5 min', lednice: 'nachystat nejvýš na 2 dny dopředu',
     suroviny: [['vlocky', 50], ['jogurt', 150], ['mleko', 80], ['jablko', 1], ['skorice', null, 'lžička']],
     postup: [
       'Večer smíchej vločky, jogurt, mléko a skořici ve sklenici.',
@@ -502,13 +503,13 @@ function vykresliPrikrmy(tab,id) { PrikrmyApp.render(tab,id); }
 
 /* ===== Navigace a režim ===== */
 function route() {
-  const [r, id, porce] = (location.hash.slice(1) || 'tyden').split('/');
-  const sekce = r === 'recept' ? 'recepty' : (r === 'den'||r === 'dnes') ? 'tyden' : r;
+  const [r, id, porce] = (location.hash.slice(1) || 'dnes').split('/');
+  const sekce = r === 'recept' ? 'recepty' : r === 'den' ? 'tyden' : r;
   document.querySelectorAll('[data-r]').forEach(a => a.classList.toggle('on', a.dataset.r === sekce));
   if (r === 'nakup') vykresliNakup();
   else if (r === 'recepty') vykresliRecepty();
   else if (r === 'den') vykresliDen(id);
-  else if (r === 'dnes') vykresliDnes();
+  else if (r === 'dnes' || r === '') vykresliUvod();
   else if (r === 'prikrmy') vykresliPrikrmy(id,porce);
   else if (r === 'recept') vykresliRecept(id, porce ? +porce : null);
   else vykresliTyden();
@@ -532,7 +533,7 @@ document.querySelectorAll('.menu a, .dole a, .brand').forEach(a => a.addEventLis
 addEventListener('hashchange', route);
 </script>
 <script src="kucharka.js?v=97b15f87a1"></script>
-<script src="aplikace.js?v=df589bf7a1"></script>
+<script src="aplikace.js?v=5081606c23"></script>
 <style>@media(min-width:800px){.rezim.mobil{display:none}}</style>
 </body>
 </html>

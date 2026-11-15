@@ -114,4 +114,77 @@ vykresliNakup=function(){
   const b=document.createElement('button');b.className='btn line';b.type='button';b.textContent='Zobrazit seznam k předání';$('#obsah .akce').append(b);
   b.addEventListener('click',()=>{const hot=store.get(KLIC_NAKUP,[]);const text=seznam().filter(p=>p.o!=='Doma'&&!jeHotovo(p,hot)).map(p=>'- '+p.n+(mnozstvi(p)?' '+mnozstvi(p):'')).join('\n');let box=$('#seznam-k-predani');if(!box){box=document.createElement('div');box.id='seznam-k-predani';$('#obsah .akce').after(box)}box.innerHTML='<label class="p-field">Nákupní seznam<textarea class="copy-area" readonly></textarea></label><p class="storage-note">Seznam můžeš předat nákupnímu asistentovi. Do košíku na Rohlíku se tím sám nevloží.</p>';const area=box.querySelector('textarea');area.value=text;area.focus();area.select()});
 };
+
+/* ===== Úvod Dnes: jídla s fotkou, dáreček u jídla od mamky, hrnec u vaření ===== */
+const IKONA_HRNEC = '<svg class="ikona" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h16v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/><path d="M2 10h2M20 10h2M9 6c0-1 1-1 1-2M14 6c0-1 1-1 1-2"/></svg>';
+const IKONA_DAREK = '<svg class="ikona" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="9" width="17" height="4" rx="1"/><path d="M5 13v7h14v-7M12 9v11"/><path d="M12 9c-2-4-6-4-6-1.5S10 9 12 9zM12 9c2-4 6-4 6-1.5S14 9 12 9z"/></svg>';
+const IKONA_LZICKA = '<svg class="ikona" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6.5" rx="3.5" ry="4.5"/><path d="M12 11v10"/></svg>';
+const DNY_KRATCE = ['Ne','Po','Út','St','Čt','Pá','So'];
+const PORADI_JIDEL = {'Snídaně':0,'Oběd':1,'Večeře':2};
+const katalogPodleNazvu = nazev => Object.values(KATALOG).find(r => normalizuj(r.nazev) === normalizuj(nazev));
+function odkazJidla(j) {
+  if (j.recept) return '#recept/' + j.recept;
+  const k = j.co && katalogPodleNazvu(j.co);
+  return k ? '#recept/' + k.id : '';
+}
+function fotoJidla(j) {
+  const r = j.recept && RECEPTY[j.recept];
+  if (r) return r.fotoNahled || r.foto || '';
+  const k = j.co && katalogPodleNazvu(j.co);
+  return k ? (k.fotoNahled || k.foto || '') : '';
+}
+function dlazdice(foto, ikona) {
+  if (ikona) return `<span class="dlazdice s-ikonou">${ikona}</span>`;
+  return foto ? `<img class="dlazdice" src="${esc(foto)}" alt="" loading="lazy">` : '<span class="dlazdice"></span>';
+}
+function radekJidla({odkaz, foto, ikona, kdy, nazev, pozn, akce}) {
+  const obsah = `${dlazdice(foto, ikona)}<span class="radek-text">${kdy ? `<small>${esc(kdy)}</small>` : ''}<b>${esc(nazev)}</b>${pozn ? `<small>${esc(pozn)}</small>` : ''}</span>`;
+  return `<div class="radek-jidla">${odkaz ? `<a href="${odkaz}">${obsah}</a>` : `<div>${obsah}</div>`}${akce || ''}</div>`;
+}
+function radekAnicky(id, d) {
+  const plan = PrikrmyApp.core.read().plans.find(p => p.date === id);
+  if (plan) {
+    const r = PrikrmyApp.core.recipes.find(x => x.id === plan.recipeId);
+    return radekJidla({odkaz:'#prikrmy/plan', foto:r?.photo, ikona:r?.photo ? '' : IKONA_LZICKA, kdy:'Anička', nazev:plan.title,
+      akce:`<button class="btn line male" type="button" data-p-log="${esc(plan.id)}">Zapsat</button>`});
+  }
+  const navrh = d?.prikrmNavrh ? d.prikrmNavrh.split('. ')[0].replace(/\.$/, '') : '';
+  return radekJidla({odkaz:`#prikrmy/new/${id}`, ikona:IKONA_LZICKA, kdy:'Anička', nazev: navrh || 'Naplánovat příkrm', pozn: navrh ? 'naplánovat' : ''});
+}
+function vykresliUvod() {
+  const dnes = new Date(), id = PrikrmyApp.core.localDate(dnes);
+  const d = nactiDatum(id) || {dt:dnes, jidla:[]};
+  const jidla = [...d.jidla].sort((a,b) => (PORADI_JIDEL[a.kdy] ?? 9) - (PORADI_JIDEL[b.kdy] ?? 9));
+  let h = `<div class="top uvod-top"><p class="muted">${DNY[dnes.getDay()]} ${datum(dnes)}</p><h1>Dnes</h1></div><div class="uvod">`;
+  h += `<section class="uvod-karta">${jidla.map(j => radekJidla({odkaz:odkazJidla(j), foto:fotoJidla(j), ikona:j.od ? IKONA_DAREK : '', kdy:j.kdy, nazev:JMENO_JIDLA(j), pozn:j.od || j.pozn})).join('') || '<p class="muted uvod-prazdno">Na dnešek zatím nic.</p>'}${radekAnicky(id, d)}</section>`;
+  const pulnoc = new Date(dnes); pulnoc.setHours(0,0,0,0);
+  const dates = DATUMY();
+  const dalsi = dnyTydne().map((x,i) => ({...x, i})).find(x => x.vari?.length && x.dt >= pulnoc);
+  if (dalsi) {
+    const kdy = (stejnyDen(dalsi.dt, dnes) ? 'Dnes' : DNY_KRATCE[dalsi.dt.getDay()]) + (dalsi.dt.getDay() === 2 ? ' večer' : '');
+    h += `<section class="uvod-karta"><a class="vareni-hlava" href="#den/${dates[dalsi.i]}">${IKONA_HRNEC}<b>${kdy}</b></a>${dalsi.vari.map(([rid,p]) => { const r = RECEPTY[rid]; return radekJidla({odkaz:`#recept/${rid}${p ? '/' + p : ''}`, foto:r.fotoNahled || r.foto, nazev:r.kratce, pozn: p && r.porce === 1 ? pocetPorci(p) : ''}); }).join('')}</section>`;
+  }
+  h += `</div><div class="uvod-odkazy"><a href="#tyden">Celý týden</a><a href="#nakup">Nákup</a></div>`;
+  $('#obsah').innerHTML = h;
+  PrikrmyApp.bindDayButtons($('#obsah'));
+}
+
+/* ===== Týden: bez opakovaných řádků, hrnec u vaření, dáreček od mamky ===== */
+vykresliTyden = function() {
+  const dny = dnyTydne(), dates = DATUMY(), dnes = new Date();
+  let h = `<div class="top"><h1>Týden</h1><p class="muted">${datum(dny[0].dt)} - ${datum(dny[6].dt)} ${dny[0].dt.getFullYear()}</p></div><div class="cook-layout"><section><div class="section-head"><h2>Co nachystat</h2></div><div class="cooking-blocks">`;
+  dny.forEach((d,i) => {
+    if (!d.vari?.length) return;
+    h += `<article class="cook-block"><div class="cook-when">${IKONA_HRNEC}${DNY[d.dt.getDay()]}${d.dt.getDay() === 2 ? ' večer' : ''}</div><ul class="cook-list">${d.vari.map(([id,p]) => `<li><a href="#recept/${id}${p ? '/' + p : ''}">${esc(RECEPTY[id].kratce)}${p ? ', ' + pocetPorci(p) : ''}</a><small>${esc(vyuziti(id,i))}</small></li>`).join('')}</ul><a class="text-link" href="#den/${dates[i]}">Otevřít den</a></article>`;
+  });
+  h += `</div></section><section><div class="section-head"><h2>Celý týden</h2><a class="text-link" href="#nakup">Nákup</a></div><div class="week-list">`;
+  dny.forEach((d,i) => {
+    const plan = PrikrmyApp.core.read().plans.find(p => p.date === dates[i]);
+    const dnesJe = stejnyDen(d.dt, dnes);
+    h += `<article class="week-entry${dnesJe ? ' today' : ''}"><a class="week-day" href="#den/${dates[i]}" aria-label="${DNY[d.dt.getDay()]} ${datum(d.dt)} - otevřít den"><span class="week-date"><b>${DNY[d.dt.getDay()]}${d.vari?.length ? IKONA_HRNEC : ''}</b><small>${datum(d.dt)}${dnesJe ? ', dnes' : ''}</small></span><span class="week-meals">${d.jidla.length ? d.jidla.map(j => `<div><small>${esc(j.kdy)}</small><span>${j.od ? IKONA_DAREK : ''}${esc(JMENO_JIDLA(j))}${j.od ? `<span class="meal-note">${esc(j.od)}</span>` : ''}</span></div>`).join('') : '<span class="week-empty">Zatím volno</span>'}</span><span class="chevron" aria-hidden="true">›</span></a>${plan ? `<div class="week-baby">${PrikrmyApp.dayCard(dates[i])}</div>` : ''}</article>`;
+  });
+  $('#obsah').innerHTML = h + '</div></section></div>';
+  PrikrmyApp.bindDayButtons($('#obsah'));
+};
+
 route();

@@ -34,3 +34,31 @@ body{font-size:16px;line-height:1.55}.head{max-width:1200px;min-height:78px;padd
   .karta .card-bottom{gap:0 8px;margin:0;padding:2px 0 0;line-height:1.3}
   .karta .card-bottom span{font-size:10px;padding:0;background:none;border-radius:0}
 }
+
+/* Úvod Dnes */
+.uvod-top{margin-bottom:16px}.uvod-top p{margin:0 0 2px;font-size:14px}
+.uvod{display:grid;gap:12px;max-width:920px}
+@media(min-width:800px){.uvod{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);align-items:start}}
+.uvod-karta{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:8px 14px}
+.uvod-prazdno{margin:10px 0}
+.radek-jidla{display:flex;align-items:center;gap:10px;border-top:1px solid var(--line)}
+.uvod-karta>.radek-jidla:first-child,.vareni-hlava+.radek-jidla{border-top:0}
+.radek-jidla>a,.radek-jidla>div{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:8px 0;text-decoration:none;color:inherit}
+.radek-jidla>a:hover b{color:var(--accent)}
+.dlazdice{width:56px;height:56px;flex:none;border-radius:8px;object-fit:cover;background:var(--note);display:block}
+.dlazdice.s-ikonou{display:grid;place-items:center;color:var(--accent)}
+.dlazdice.s-ikonou .ikona{width:30px;height:30px}
+.radek-text{display:flex;flex-direction:column;min-width:0}
+.radek-text b{font-weight:550;line-height:1.3}
+.radek-text small{color:var(--muted);font-size:12px;line-height:1.35}
+.btn.male{min-height:36px;padding:6px 12px;font-size:13px;flex:none}
+.vareni-hlava{display:flex;align-items:center;gap:10px;padding:10px 0 4px;text-decoration:none;color:inherit}
+.vareni-hlava .ikona{width:24px;height:24px;color:var(--accent)}
+.vareni-hlava b{font-weight:650}
+.uvod-odkazy{display:flex;justify-content:space-between;max-width:920px;padding:14px 2px 0}
+.uvod-odkazy a{color:var(--accent);font-weight:600;text-decoration:none}
+/* Týden: ikony */
+.cook-when .ikona{width:20px;height:20px}
+.week-date b{display:flex;align-items:center;gap:5px}.week-date .ikona{width:16px;height:16px;color:var(--accent)}
+.week-meals .ikona{width:14px;height:14px;color:var(--accent);vertical-align:-2px;margin-right:5px}
+@media(max-width:560px){.dole a{font-size:12px;padding:8px 2px}}
