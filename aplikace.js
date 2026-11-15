@@ -54,7 +54,7 @@ function vykresliDen(id,allowOutside=false) {
 }
 function card(r) {
   const tags=r.tags||[],foto=r.fotoNahled||r.foto;
-  return `<a class="karta${tags.includes('oblíbené')?' favorite':''}" href="#recept/${esc(r.id)}">${foto?`<img src="${esc(foto)}" alt="" loading="lazy">`:''}<span class="nm">${esc(r.nazev)}</span>${r.cas?`<span class="meta">${esc(r.cas)}</span>`:''}${r.hlavni?`<span class="ingredients">${esc(r.hlavni)}</span>`:''}<span class="card-bottom">${tags.filter(t=>NAZVY_KATEGORII.includes(t)||t==='oblíbené').slice(0,3).map(t=>`<span>${esc(t)}</span>`).join('')}${r.uplny===false?'<span>Neúplný zápis</span>':''}</span></a>`;
+  return `<a class="karta${foto?' has-photo':''}${tags.includes('oblíbené')?' favorite':''}" href="#recept/${esc(r.id)}">${foto?`<img src="${esc(foto)}" alt="" loading="lazy">`:''}<span class="nm">${esc(r.nazev)}</span>${r.cas?`<span class="meta">${esc(r.cas)}</span>`:''}${r.hlavni?`<span class="ingredients">${esc(r.hlavni)}</span>`:''}<span class="card-bottom">${tags.filter(t=>NAZVY_KATEGORII.includes(t)||t==='oblíbené').slice(0,3).map(t=>`<span>${esc(t)}</span>`).join('')}${r.uplny===false?'<span>Neúplný zápis</span>':''}</span></a>`;
 }
 function vysledkyKatalogu() {
   const q=normalizuj(hledani).trim().split(/\s+/).filter(Boolean);
@@ -64,7 +64,7 @@ function vysledkyKatalogu() {
   $('#vysledky').innerHTML=list.length?`<div class="karty">${list.map(card).join('')}</div>`:'<div class="empty-results">Žádný recept neodpovídá výběru. Zkus jinou surovinu nebo zruš filtr.</div>';
 }
 vykresliRecepty = function() {
-  $('#obsah').innerHTML=`<div class="top"><p class="eyebrow">Naše kuchařka</p><h1>Co si dáme?</h1><p class="muted">Tvoje recepty pohromadě, pro Helču i Honzu.</p></div><div class="catalog-tools"><input type="search" id="hledat-recept" aria-label="Hledat podle názvu nebo suroviny" placeholder="Název jídla nebo surovina" value="${esc(hledani)}"><select id="kategorie-receptu" aria-label="Druh jídla"><option value="">Všechna jídla</option>${NAZVY_KATEGORII.map(t=>`<option ${kategorie===t?'selected':''} value="${t}">${t[0].toUpperCase()+t.slice(1)}</option>`).join('')}</select><label class="favorite-filter"><input id="jen-oblibene" type="checkbox" ${jenOblibene?'checked':''}>Jen oblíbené</label></div><p id="pocet-receptu" class="catalog-count" role="status" aria-live="polite"></p><div id="vysledky"></div>`;
+  $('#obsah').innerHTML=`<div class="top"><p class="eyebrow">Naše kuchařka</p><h1>Co si dáme?</h1></div><div class="catalog-tools"><input type="search" id="hledat-recept" aria-label="Hledat podle názvu nebo suroviny" placeholder="Jídlo nebo surovina" value="${esc(hledani)}"><select id="kategorie-receptu" aria-label="Druh jídla"><option value="">Všechna jídla</option>${NAZVY_KATEGORII.map(t=>`<option ${kategorie===t?'selected':''} value="${t}">${t[0].toUpperCase()+t.slice(1)}</option>`).join('')}</select><label class="favorite-filter"><input id="jen-oblibene" type="checkbox" ${jenOblibene?'checked':''}>Jen oblíbené</label></div><p id="pocet-receptu" class="catalog-count" role="status" aria-live="polite"></p><div id="vysledky"></div>`;
   $('#hledat-recept').addEventListener('input',e=>{hledani=e.target.value;vysledkyKatalogu()});
   $('#kategorie-receptu').addEventListener('change',e=>{kategorie=e.target.value;vysledkyKatalogu()});
   $('#jen-oblibene').addEventListener('change',e=>{jenOblibene=e.target.checked;vysledkyKatalogu()});
