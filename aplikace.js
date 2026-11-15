@@ -17,7 +17,7 @@ function priprava(d) {
   return [...(d.vari || []),...d.jidla.filter(j=>j.chystas).map(j=>[j.recept,j.chystas])];
 }
 function vyuziti(id, start) {
-  return dnyTydne().slice(start).filter(d=>d.jidla.some(j=>j.recept===id)).slice(0,2).map(d=>DNY[d.dt.getDay()].toLowerCase()).join(' a ');
+  return dnyTydne().slice(start).filter((d,i)=>d.jidla.some(j=>j.recept===id&&(i>0||j.kdy!=='Snídaně'))).slice(0,2).map(d=>DNY[d.dt.getDay()].toLowerCase()).join(' a ');
 }
 vykresliTyden = function() {
   const dny=dnyTydne(), dates=DATUMY(), dnes=new Date();
