@@ -54,7 +54,7 @@ function vykresliDen(id,allowOutside=false) {
 }
 function card(r) {
   const tags=r.tags||[],foto=r.fotoNahled||r.foto;
-  return `<a class="karta${foto?' has-photo':''}${tags.includes('oblíbené')?' favorite':''}" href="#recept/${esc(r.id)}">${foto?`<img src="${esc(foto)}" alt="" loading="lazy">`:''}<span class="nm">${esc(r.nazev)}</span>${r.cas?`<span class="meta">${esc(r.cas)}</span>`:''}${r.hlavni?`<span class="ingredients">${esc(r.hlavni)}</span>`:''}<span class="card-bottom">${tags.filter(t=>NAZVY_KATEGORII.includes(t)||t==='oblíbené').slice(0,3).map(t=>`<span>${esc(t)}</span>`).join('')}${r.uplny===false?'<span>Neúplný zápis</span>':''}</span></a>`;
+  return `<a class="karta${foto?' has-photo':''}${tags.includes('oblíbené')?' favorite':''}" href="#recept/${esc(r.id)}">${foto?`<img src="${esc(foto)}" alt="" loading="lazy">`:'<span class="recipe-no-photo" aria-hidden="true">Bez fotky</span>'}<span class="nm">${esc(r.nazev)}</span>${r.cas?`<span class="meta">${esc(r.cas)}</span>`:''}${r.hlavni?`<span class="ingredients">${esc(r.hlavni)}</span>`:''}<span class="card-bottom">${tags.filter(t=>NAZVY_KATEGORII.includes(t)||t==='oblíbené').slice(0,3).map(t=>`<span>${esc(t)}</span>`).join('')}${r.uplny===false?'<span>Neúplný zápis</span>':''}</span></a>`;
 }
 function vysledkyKatalogu() {
   const q=normalizuj(hledani).trim().split(/\s+/).filter(Boolean);

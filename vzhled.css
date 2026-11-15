@@ -7,6 +7,8 @@ body{font-size:16px;line-height:1.55}.head{max-width:1200px;min-height:78px;padd
 .btn{text-decoration:none}.baby-plan{font-size:13px;color:var(--muted);margin:0 0 10px}.baby-plan b{color:var(--ink)}
 .today-shortcut{font-size:14px;font-weight:600;color:var(--accent);background:var(--note);padding:8px 12px;border-radius:8px;text-decoration:none;margin-left:auto;white-space:nowrap}.own-shopping-row{display:flex;align-items:center;gap:12px;border-top:1px solid var(--line)}.own-shopping-row:first-of-type{border-top:0}.own-shopping-row .pol{flex:1;border-top:0;min-width:0}.own-shopping-row .nm{overflow-wrap:anywhere}.own-shopping-row button{font-size:12px;min-height:44px;flex:none}.own-shopping-editor summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--accent);min-height:36px}.own-shopping-editor input{font:inherit;background:var(--bg);border:1px solid var(--line2);color:var(--ink);padding:10px;border-radius:8px;max-width:100%}#nakup-status:empty{display:none}
 
+.recipe-no-photo{display:grid;place-items:center;aspect-ratio:4/3;width:calc(100% + 36px);margin:-18px -18px 18px;background:var(--note);color:var(--muted);font-size:13px}
+
 /* Na telefonu má kuchařka podobu krátkého seznamu. */
 @media(max-width:560px){
   .head{min-height:56px;padding-top:8px;padding-bottom:8px}
@@ -22,10 +24,10 @@ body{font-size:16px;line-height:1.55}.head{max-width:1200px;min-height:78px;padd
   .favorite-filter{min-height:44px;padding:4px 0;font-size:13px}
   .catalog-count{font-size:12px;margin-bottom:8px}
   .karty{display:grid;grid-template-columns:1fr;gap:0;border-top:1px solid var(--line)}
-  .karta{display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:2px 12px;min-height:0;padding:12px 0;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent}
-  .karta.has-photo{grid-template-columns:80px minmax(0,1fr)}
-  .karta.has-photo>img{grid-column:1;grid-row:1 / span 4;width:80px;height:80px;aspect-ratio:1;object-fit:cover;margin:0;border-radius:0}
-  .karta.has-photo>.nm,.karta.has-photo>.meta,.karta.has-photo>.ingredients,.karta.has-photo>.card-bottom{grid-column:2}
+  .karta{display:grid;grid-template-columns:80px minmax(0,1fr);align-content:start;gap:2px 12px;min-height:105px;padding:12px 0;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent}
+  .karta>img,.karta>.recipe-no-photo{grid-column:1;grid-row:1 / span 4;width:80px;height:80px;aspect-ratio:1;object-fit:cover;margin:0;border-radius:0}
+  .karta>.nm,.karta>.meta,.karta>.ingredients,.karta>.card-bottom{grid-column:2}
+  .karta>.recipe-no-photo{font-size:11px}
   .karta .nm{font-size:15px;line-height:1.3;font-weight:550}
   .karta .meta{font-size:12px;line-height:1.4;margin:0}
   .karta .ingredients{font-size:12px;line-height:1.4;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
