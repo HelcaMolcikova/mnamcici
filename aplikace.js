@@ -28,7 +28,7 @@ vykresliTyden = function() {
     h+=`<article class="cook-block"><div class="cook-when"><span class="cook-number">${++n}</span>${DNY[d.dt.getDay()]}${d.dt.getDay()===2?' večer':''}</div><h3>${d.vari.map(([id])=>esc(RECEPTY[id].kratce)).join(' a ')}</h3><ul class="cook-list">${d.vari.map(([id,p])=>`<li><a href="#recept/${id}${p?'/'+p:''}">${esc(RECEPTY[id].kratce)}${p?' · '+pocetPorci(p):''}</a><small>${esc(vyuziti(id,i))}${id==='oats'?', pro Helču':''}</small></li>`).join('')}</ul><a class="text-link" href="#den/${dates[i]}">Otevřít den</a></article>`;
   });
   const darovana=dny.flatMap(d=>d.jidla.filter(j=>j.od).map(j=>({d,j})));
-  const nachystana=[...darovana,...dny.flatMap(d=>(d.uvareno||[]).map(j=>({d,j:{...j,od:'už upečené'}})))];
+  const nachystana=[...darovana,...dny.flatMap(d=>(d.uvareno||[]).map(j=>({d,j:{...j,od:'- upečeno'}})))];
   if(nachystana.length)h+=`<div class="already"><b>Už máme nachystáno</b>${nachystana.map(({d,j})=>`<p>${esc(DNY[d.dt.getDay()])}: ${esc(JMENO_JIDLA(j))} ${esc(j.od)}.</p>`).join('')}</div>`;
   h+=`</div></section><section><div class="section-head"><h2>Celý týden</h2><a class="text-link" href="#nakup">Nákup</a></div><div class="week-list">`;
   dny.forEach((d,i)=>{
