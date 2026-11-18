@@ -299,8 +299,12 @@ const TYDEN = {
         { kdy: 'Snídaně', recept: 'oats', pozn: 'pro Helču' },
         { kdy: 'Oběd', recept: 'rajska', pozn: 'z úterý' },
       ] },
-    { jidla: [{ kdy: 'Snídaně', recept: 'oats', pozn: 'pro Helču' }] },
-    { jidla: [] },
+    { jidla: [
+        { kdy: 'Snídaně', recept: 'oats', pozn: 'pro Helču' },
+        { kdy: 'Snídaně', co: 'Chia tiramisu', pozn: 'nachystané ve středu' },
+        { kdy: 'Svačina', co: 'Chia tiramisu', pozn: 'nachystané ve středu' },
+      ] },
+    { jidla: [{ kdy: 'Snídaně', co: 'Chia tiramisu', pozn: 'nachystané ve středu' }] },
     { jidla: [] },
   ],
 };
@@ -536,7 +540,7 @@ document.querySelectorAll('.menu a, .dole a, .brand').forEach(a => a.addEventLis
 addEventListener('hashchange', route);
 </script>
 <script src="kucharka.js?v=97b15f87a1"></script>
-<script src="aplikace.js?v=f0c8690c00"></script>
+<script src="aplikace.js?v=18b03d6a25"></script>
 <style>@media(min-width:800px){.rezim.mobil{display:none}}</style>
 </body>
 </html>

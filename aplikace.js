@@ -88,8 +88,30 @@ vykresliRecept=function(id,porce){
   id=KATALOG_PLAN[id]||id;
   if(RECEPTY[id]){planovanyRecept(id,Number.isFinite(porce)&&porce>0?Math.min(porce,100):null);const a=$('#obsah .zpet');if(a){a.href=posledniPrehled;a.textContent=posledniPrehled.startsWith('#den/')?'Zpět na den':posledniPrehled==='#tyden'?'Zpět na týden':'Zpět na recepty'}return;}
   const r=KATALOG[id];if(!r)return vykresliRecepty();
-  $('#obsah').innerHTML=`<article class="recept"><a class="back-link" href="${esc(posledniPrehled)}">Zpět do přehledu</a><div class="catalog-detail-head"><p class="eyebrow">Naše kuchařka</p><h1>${esc(r.nazev)}</h1><div class="recipe-info">${r.cas?`<span class="tag">${esc(r.cas)}</span>`:''}${r.tags.filter(t=>NAZVY_KATEGORII.includes(t)||t==='oblíbené').map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>${r.hlavni?`<p class="muted">${esc(r.hlavni)}</p>`:''}${!r.uplny?'<p class="recipe-alert">Ve tvé kuchařce není tento recept dopsaný celý. Zobrazuje se původní dostupný zápis.</p>':''}</div>${r.foto?`<img class="foto" src="${esc(r.foto)}" alt="${esc(r.nazev)}" loading="eager">${r.fotoIlustracni?'<p class="recipe-source">Ilustrační obrázek vytvořený pomocí AI.</p>':''}`: ''}<div class="recipe-text">${r.sections.map(s=>`<section class="recipe-section"><h2>${esc(s.title.replace(/\*\*/g,''))}</h2>${s.text?pracovniText(s.text):'<p class="muted">V původním zápisu zatím není doplněno.</p>'}</section>`).join('')}</div>${r.zdroj?`<p class="recipe-source">Zdroj: <a href="${esc(r.zdroj)}" target="_blank" rel="noopener noreferrer">${esc(new URL(r.zdroj).hostname)}</a></p>`:r.puvod?`<p class="recipe-source">Zdroj: ${esc(r.puvod)}</p>`:''}</article>`;
+  $('#obsah').innerHTML=`<article class="recept"><a class="back-link" href="${esc(posledniPrehled)}">Zpět do přehledu</a><div class="catalog-detail-head"><p class="eyebrow">Naše kuchařka</p><h1>${esc(r.nazev)}</h1><div class="recipe-info">${r.cas?`<span class="tag">${esc(r.cas)}</span>`:''}${r.tags.filter(t=>NAZVY_KATEGORII.includes(t)||t==='oblíbené').map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>${r.hlavni?`<p class="muted">${esc(r.hlavni)}</p>`:''}${!r.uplny?'<p class="recipe-alert">Ve tvé kuchařce není tento recept dopsaný celý. Zobrazuje se původní dostupný zápis.</p>':''}</div>${r.foto?`<img class="foto" src="${esc(r.foto)}" alt="${esc(r.nazev)}" loading="eager">${r.fotoIlustracni?'<p class="recipe-source">Ilustrační obrázek vytvořený pomocí AI.</p>':''}`: ''}<div class="recipe-text">${r.sections.map(s=>sekceReceptu(r,s,porce)).join('')}</div>${r.zdroj?`<p class="recipe-source">Zdroj: <a href="${esc(r.zdroj)}" target="_blank" rel="noopener noreferrer">${esc(new URL(r.zdroj).hostname)}</a></p>`:r.puvod?`<p class="recipe-source">Zdroj: ${esc(r.puvod)}</p>`:''}</article>`;
 };
+const KLIC_PORCE='molcuchyne-porce';
+const zakladPorci=title=>{const m=title.match(/^\**Suroviny\b[^0-9]*?(\d+)\s*porc/i);return m?+m[1]:null;};
+const ZLOMKY={'½':.5,'¼':.25,'¾':.75};
+const hezkeCislo=v=>{const r=v>=10?Math.round(v):v>=1?Math.round(v*2)/2:Math.max(.25,Math.round(v*4)/4);return String(r).replace('.',',');};
+const hodnota=t=>{if(ZLOMKY[t])return ZLOMKY[t];const [a,b]=t.replace(',','.').split('/');return b?a/b:+a;};
+function skalujSuroviny(text,krat){
+  const cislo='(?:\\d+(?:[.,]\\d+)?(?:\\/\\d+)?|[½¼¾])';
+  const re=new RegExp(`(?<![\\p{L}\\d/.,])(${cislo})(?:(\\s*-\\s*)(${cislo}))?(?![\\p{L}\\d])`,'gu');
+  return text.split('\n').map(radek=>radek.split(/(\]\([^)]*\))/).map((kus,j)=>j%2?kus:kus.replace(re,(cely,x,pomlcka,y,i,txt)=>{
+    if(/^\s*(?:°|%|cm\b)/i.test(txt.slice(i+cely.length))||/č\.\s*$/.test(txt.slice(0,i)))return cely;
+    return hezkeCislo(hodnota(x)*krat)+(y?pomlcka+hezkeCislo(hodnota(y)*krat):'');
+  })).join('')).join('\n');
+}
+function sekceReceptu(r,s,porce){
+  const zaklad=zakladPorci(s.title);
+  if(!zaklad||!s.text)return `<section class="recipe-section"><h2>${esc(s.title.replace(/\*\*/g,''))}</h2>${s.text?pracovniText(s.text):'<p class="muted">V původním zápisu zatím není doplněno.</p>'}</section>`;
+  const ulozene=store.get(KLIC_PORCE,{});
+  const p=Number.isFinite(porce)&&porce>0?Math.min(porce,100):ulozene[r.id]||zaklad;
+  const navic=(s.title.match(/\/\s*([^)]+)\)/)||[])[1];
+  return `<section class="recipe-section"><h2>Suroviny</h2><div class="porce"><button type="button" data-kp="${Math.max(1,p-1)}" aria-label="Méně porcí">-</button><span>${pocetPorci(p)}</span><button type="button" data-kp="${p+1}" aria-label="Víc porcí">+</button></div>${navic?`<p class="small muted">${esc(navic.trim())}</p>`:''}${pracovniText(skalujSuroviny(s.text,p/zaklad))}</section>`;
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-kp]');if(!b)return;const id=location.hash.split('/')[1];const n=+b.dataset.kp;const ul=store.get(KLIC_PORCE,{});ul[id]=n;store.set(KLIC_PORCE,ul);history.replaceState(null,'',`#recept/${id}/${n}`);vykresliRecept(id,n);});
 document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#recept/"]');if(a&&!location.hash.startsWith('#recept/'))posledniPrehled=location.hash||'#tyden'},true);
 const puvodniNakup=vykresliNakup;
 vykresliNakup=function(){
@@ -120,7 +142,7 @@ const IKONA_HRNEC = '<svg class="ikona" viewBox="0 0 24 24" fill="none" stroke="
 const IKONA_DAREK = '<svg class="ikona" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="9" width="17" height="4" rx="1"/><path d="M5 13v7h14v-7M12 9v11"/><path d="M12 9c-2-4-6-4-6-1.5S10 9 12 9zM12 9c2-4 6-4 6-1.5S14 9 12 9z"/></svg>';
 const IKONA_LZICKA = '<svg class="ikona" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6.5" rx="3.5" ry="4.5"/><path d="M12 11v10"/></svg>';
 const DNY_KRATCE = ['Ne','Po','Út','St','Čt','Pá','So'];
-const PORADI_JIDEL = {'Snídaně':0,'Oběd':1,'Večeře':2};
+const PORADI_JIDEL = {'Snídaně':0,'Svačina':1,'Oběd':2,'Večeře':3};
 const katalogPodleNazvu = nazev => Object.values(KATALOG).find(r => normalizuj(r.nazev) === normalizuj(nazev));
 function odkazJidla(j) {
   if (j.recept) return '#recept/' + j.recept;
