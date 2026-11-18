@@ -131,7 +131,7 @@ vykresliNakup=function(){
   $('#obsah').querySelectorAll('[data-edit-item]').forEach(b=>b.onclick=()=>{const item=nactiVlastniNakup().find(x=>x.id===b.dataset.editItem);if(!item)return;editor.open=true;form.elements.itemId.value=item.id;form.elements.name.value=item.name;form.elements.amount.value=item.amount;editor.querySelector('summary').textContent='Upravit vlastní položku';form.elements.name.focus();});
 
   const note=document.createElement('p');note.className='storage-note';note.textContent='Odškrtnutí se ukládá v tomto prohlížeči. Na druhém telefonu se samo nezmění.';$('#obsah .akce').after(note);
-  const navrhy=dnyTydne().filter(d=>d.prikrmNavrh&&!PrikrmyApp.core.read().plans.some(p=>p.date===PrikrmyApp.core.localDate(d.dt)));
+  const navrhy=dnyTydne().filter(d=>d.prikrmNavrh&&d.dt>=new Date(new Date().setHours(0,0,0,0))&&!PrikrmyApp.core.read().plans.some(p=>p.date===PrikrmyApp.core.localDate(d.dt)));
   if(navrhy.length){const pending=document.createElement('p');pending.className='recipe-alert';pending.textContent='K příkrmu ještě vyber konkrétní zeleninu a hrušku nebo jablko. Tyto nerozhodnuté suroviny zatím nejsou přičtené do nákupu.';note.after(pending)}
   const b=document.createElement('button');b.className='btn line';b.type='button';b.textContent='Zobrazit seznam k předání';$('#obsah .akce').append(b);
   b.addEventListener('click',()=>{const hot=store.get(KLIC_NAKUP,[]);const text=seznam().filter(p=>p.o!=='Doma'&&!jeHotovo(p,hot)).map(p=>'- '+p.n+(mnozstvi(p)?' '+mnozstvi(p):'')).join('\n');let box=$('#seznam-k-predani');if(!box){box=document.createElement('div');box.id='seznam-k-predani';$('#obsah .akce').after(box)}box.innerHTML='<label class="p-field">Nákupní seznam<textarea class="copy-area" readonly></textarea></label><p class="storage-note">Seznam můžeš předat nákupnímu asistentovi. Do košíku na Rohlíku se tím sám nevloží.</p>';const area=box.querySelector('textarea');area.value=text;area.focus();area.select()});
@@ -193,12 +193,14 @@ function vykresliUvod() {
 /* ===== Týden: bez opakovaných řádků, hrnec u vaření, dáreček od mamky ===== */
 vykresliTyden = function() {
   const dny = dnyTydne(), dates = DATUMY(), dnes = new Date();
-  let h = `<div class="top"><h1>Týden</h1><p class="muted">${datum(dny[0].dt)} - ${datum(dny[6].dt)} ${dny[0].dt.getFullYear()}</p></div><div class="cook-layout"><section><div class="section-head"><h2>Co nachystat</h2></div><div class="cooking-blocks">`;
+  let h = `<div class="top"><h1>Týden</h1><p class="muted">${datum(dny[0].dt)} - ${datum(dny[6].dt)} ${dny[0].dt.getFullYear()}</p></div><div class="cook-layout">`;
+  if (dny.some(d => d.vari?.length)) h += `<section><div class="section-head"><h2>Co nachystat</h2></div><div class="cooking-blocks">`;
   dny.forEach((d,i) => {
     if (!d.vari?.length) return;
     h += `<article class="cook-block"><div class="cook-when">${IKONA_HRNEC}${DNY[d.dt.getDay()]}${d.dt.getDay() === 2 ? ' večer' : ''}</div><ul class="cook-list">${d.vari.map(([id,p]) => `<li><a href="#recept/${id}${p ? '/' + p : ''}">${esc(RECEPTY[id].kratce)}${p ? ', ' + pocetPorci(p) : ''}</a><small>${esc(vyuziti(id,i))}</small></li>`).join('')}</ul><a class="text-link" href="#den/${dates[i]}">Otevřít den</a></article>`;
   });
-  h += `</div></section><section><div class="section-head"><h2>Celý týden</h2><a class="text-link" href="#nakup">Nákup</a></div><div class="week-list">`;
+  if (dny.some(d => d.vari?.length)) h += `</div></section>`;
+  h += `<section><div class="section-head"><h2>Celý týden</h2><a class="text-link" href="#nakup">Nákup</a></div><div class="week-list">`;
   dny.forEach((d,i) => {
     const plan = PrikrmyApp.core.read().plans.find(p => p.date === dates[i]);
     const dnesJe = stejnyDen(d.dt, dnes);
